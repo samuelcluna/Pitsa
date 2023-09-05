@@ -1,0 +1,3 @@
+rootProject.name = 'psoft-commerce'
+include 'psoft-commerce'
+

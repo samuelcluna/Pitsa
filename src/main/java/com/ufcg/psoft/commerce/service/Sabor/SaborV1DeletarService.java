@@ -23,6 +23,11 @@ public class SaborV1DeletarService implements SaborDeletarService {
         if (!estabelecimentoExistente.getCodigoAcesso().equals(codigoAcesso)) {
             throw new InvalidAccessException("Codigo de acesso invalido!"); // Bad Request
         }
+
+        if (!saborRepository.existsByIdAndEstabelecimentoId(idSabor, idEstabelecimento)) {
+            throw new AssociationNotFoundException("Associação inválida!");
+        }
+
         Sabor saborRemover = saborRepository.findById(idSabor)
                 .orElseThrow(new ResourceNotFoundException("Sabor não encontrado."));
         saborRepository.delete(saborRemover);

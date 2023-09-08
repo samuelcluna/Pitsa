@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,9 +27,11 @@ public class Sabor {
     String tipo;
 
     @JsonProperty("precoM")
+    @Positive
     double precoM;
 
     @JsonProperty("precoG")
+    @Positive
     double precoG;
 
     @JsonProperty("disponivel")

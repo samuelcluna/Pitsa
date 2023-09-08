@@ -2,8 +2,10 @@ package com.ufcg.psoft.commerce.controller;
 
 import com.ufcg.psoft.commerce.dto.Sabor.SaborPostPutRequestDTO;
 import com.ufcg.psoft.commerce.model.Sabor;
+import com.ufcg.psoft.commerce.service.Sabor.SaborAlterarService;
 import com.ufcg.psoft.commerce.service.Sabor.SaborCriarService;
 import com.ufcg.psoft.commerce.service.Sabor.SaborDeletarService;
+import com.ufcg.psoft.commerce.service.Sabor.SaborObterService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,11 +26,11 @@ public class SaborV1Controller {
     @Autowired
     SaborDeletarService deletarService;
 
-//    @Autowired
-//    SaborAlterarService alterarService;
+    @Autowired
+    SaborAlterarService alterarService;
 
-//    @Autowired
-//    SaborObterService saborObterService;
+    @Autowired
+    SaborObterService saborObterService;
 
     @PostMapping
     public ResponseEntity<Sabor> criarSabor(
@@ -51,6 +53,39 @@ public class SaborV1Controller {
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();
+    }
+
+    @PutMapping
+    public ResponseEntity<?> alterarSabor(
+            @RequestParam Long idSabor,
+            @RequestParam Long idEstabelecimento,
+            @RequestParam String codigoAcesso,
+            @RequestBody @Valid SaborPostPutRequestDTO saborPostPutRequestDTO
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(alterarService.alterar(idSabor, idEstabelecimento, codigoAcesso, saborPostPutRequestDTO));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> obterSabores(
+            @RequestParam Long idEstabelecimento,
+            @RequestParam String codigoAcesso
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(saborObterService.obterTodos(idEstabelecimento, codigoAcesso));
+    }
+
+    @GetMapping("{idSabor}")
+    public ResponseEntity<?> obterSabores(
+            @PathVariable Long idSabor,
+            @RequestParam Long idEstabelecimento,
+            @RequestParam String codigoAcesso
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(saborObterService.obter(idSabor, idEstabelecimento, codigoAcesso));
     }
 
 }

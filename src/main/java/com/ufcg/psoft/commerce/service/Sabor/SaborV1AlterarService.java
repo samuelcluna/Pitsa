@@ -1,6 +1,9 @@
 package com.ufcg.psoft.commerce.service.Sabor;
 
 import com.ufcg.psoft.commerce.dto.Sabor.SaborPostPutRequestDTO;
+import com.ufcg.psoft.commerce.exception.InvalidAccessException;
+import com.ufcg.psoft.commerce.exception.RelationshipNotFoundException;
+import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.model.Sabor;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
@@ -24,15 +27,15 @@ public class SaborV1AlterarService implements SaborAlterarService {
     @Override
     public Sabor alterar(Long idSabor, Long idEstabelecimento, String codigoAcesso, SaborPostPutRequestDTO requestDTO) {
         Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(idEstabelecimento)
-                .orElseThrow(new ResourceNotFoundException("Estabelecimento não existe."));
+                .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não existe."));
         if (!estabelecimentoExistente.getCodigoAcesso().equals(codigoAcesso)) {
             throw new InvalidAccessException("Codigo de acesso invalido!"); // Bad Request
         }
         Sabor saborAlterar = saborRepository.findById(idSabor)
-                .orElseThrow(new ResourceNotFoundException("Sabor não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Sabor não encontrado."));
 
         if (!saborRepository.existsByIdAndEstabelecimentoId(idSabor, idEstabelecimento)) {
-            throw new AssociationNotFoundException("Associação inválida!");
+            throw new RelationshipNotFoundException("Sabor não existe para esse estabelecimento!");
         }
 
         modelMapper.map(requestDTO, saborAlterar);

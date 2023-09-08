@@ -42,7 +42,7 @@ public class SaborV1Controller {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> criarSabor(
+    public ResponseEntity<?> deletarSabor(
             @RequestParam Long idSabor,
             @RequestParam Long idEstabelecimento,
             @RequestParam String codigoAcesso

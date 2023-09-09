@@ -12,6 +12,8 @@ public interface SaborRepository extends JpaRepository<Sabor, Long> {
 
     boolean existsByIdAndEstabelecimentoId(Long idSabor, Long idEstabelecimento);
 
+    Set<Sabor> findAllByEstabelecimentoIdAndTipo(Long estabelecimentoId, String tipo);
+
     Set<Sabor> findAllByEstabelecimentoId(Long estabelecimentoId);
 
     Optional<Sabor> findByIdAndEstabelecimentoId(Long idSabor, Long idEstabelecimento);

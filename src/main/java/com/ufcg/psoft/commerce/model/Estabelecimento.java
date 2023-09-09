@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.Size;
 
-import java.util.Set;
+import java.util.List;
 
 
 @Entity
@@ -23,10 +23,10 @@ public class Estabelecimento {
     private Long id;
 
     @JsonProperty("codigoAcesso")
-    @Size(min = 6, max = 6, message = "O código de acesso deve ter exatamente 6 caracteres.")
+    @Size(min = 6, max = 6, message = "Codigo de acesso deve ter exatamente 6 digitos numericos")
     private String codigoAcesso;
 
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Sabor> cardapio;
+    private List<Sabor> sabores;
 
 }

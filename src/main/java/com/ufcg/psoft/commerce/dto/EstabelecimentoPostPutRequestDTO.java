@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EstabelecimentoPostPutRequestDTO {
     @JsonProperty("codigoAcesso")
-    @Size(min = 6, max = 6, message = "O código de acesso deve ter exatamente 6 caracteres.")
+    @Size(min = 6, max = 6, message = "Codigo de acesso deve ter exatamente 6 digitos numericos")
     private String codigoAcesso;
 }

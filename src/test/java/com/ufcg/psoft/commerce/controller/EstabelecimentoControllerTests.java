@@ -3,15 +3,23 @@ package com.ufcg.psoft.commerce.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.ufcg.psoft.commerce.dto.EstabelecimentoPostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.EstabelecimentoResponseDTO;
+import com.ufcg.psoft.commerce.dto.Sabor.SaborResponseDTO;
+import com.ufcg.psoft.commerce.exception.CustomErrorType;
+import com.ufcg.psoft.commerce.model.Estabelecimento;
+import com.ufcg.psoft.commerce.model.Sabor;
+import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
+import com.ufcg.psoft.commerce.service.estabelecimento.EstabelecimentoV1MostrarCadarpioService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -27,6 +35,8 @@ public class EstabelecimentoControllerTests {
 
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
+    @Autowired
+    EstabelecimentoV1MostrarCadarpioService estabelecimentoV1MostrarCadarpioService;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -181,9 +191,11 @@ public class EstabelecimentoControllerTests {
         }
 
         @Test
+        @Transactional
         @DisplayName("Quando buscamos o cardapio de um estabelecimento")
         void quandoBuscarCardapioEstabelecimento() throws Exception {
             // Arrange
+
             Sabor sabor1 = Sabor.builder()
                     .nome("Calabresa")
                     .precoM(25.0)
@@ -203,7 +215,6 @@ public class EstabelecimentoControllerTests {
                     .precoG(35.0)
                     .tipo("doce")
                     .build();
-
             Sabor sabor4 = Sabor.builder()
                     .nome("Morango")
                     .precoM(20.0)
@@ -211,23 +222,21 @@ public class EstabelecimentoControllerTests {
                     .tipo("doce")
                     .build();
             Estabelecimento estabelecimento1 = Estabelecimento.builder()
-                    .codigoAcesso("123456")
-                    .sabores(Set.of(sabor1, sabor2, sabor3, sabor4))
+                    .codigoAcesso("654321")
+                    .sabores(List.of(sabor1,sabor2,sabor3,sabor4))
                     .build();
             estabelecimentoRepository.save(estabelecimento1);
-
             // Act
             String responseJsonString = driver.perform(get(URI_ESTABELECIMENTOS + "/" + estabelecimento1.getId() + "/sabores")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(estabelecimentoPostRequestDTO)))
+                            .content(objectMapper.writeValueAsString(estabelecimentoPostRequestDTO))) //Alteracao de estabelecimentoPostRequestDTO para o valor de codigo valido.
                     .andExpect(status().isOk()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
-
-            List<SaborResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
+            List<Sabor> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
             });
 
-            // Assert
+
             assertAll(
                     () -> assertEquals(4, resultado.size())
             );
@@ -243,7 +252,7 @@ public class EstabelecimentoControllerTests {
             String responseJsonString = driver.perform(get(URI_ESTABELECIMENTOS + "/" + 9999 + "/sabores")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(estabelecimentoPostRequestDTO)))
-                    .andExpect(status().isBadRequest()) // Codigo 404
+                    .andExpect(status().isNotFound()) // Codigo 404
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
@@ -256,6 +265,7 @@ public class EstabelecimentoControllerTests {
         }
 
         @Test
+        @Transactional
         @DisplayName("Quando buscamos o cardapio de um estabelecimento por tipo (salgado)")
         void quandoBuscarCardapioEstabelecimentoPorTipo() throws Exception {
             // Arrange
@@ -286,8 +296,8 @@ public class EstabelecimentoControllerTests {
                     .tipo("doce")
                     .build();
             Estabelecimento estabelecimento1 = Estabelecimento.builder()
-                    .codigoAcesso("123456")
-                    .sabores(Set.of(sabor1, sabor2, sabor3, sabor4))
+                    .codigoAcesso("654321")
+                    .sabores(List.of(sabor1, sabor2, sabor3, sabor4))
                     .build();
             estabelecimentoRepository.save(estabelecimento1);
 
@@ -310,6 +320,7 @@ public class EstabelecimentoControllerTests {
         }
 
         @Test
+        @Transactional
         @DisplayName("Quando buscamos o cardapio de um estabelecimento por tipo (doce)")
         void quandoBuscarCardapioEstabelecimentoPorTipoDoce() throws Exception {
             // Arrange
@@ -340,8 +351,8 @@ public class EstabelecimentoControllerTests {
                     .tipo("doce")
                     .build();
             Estabelecimento estabelecimento1 = Estabelecimento.builder()
-                    .codigoAcesso("123456")
-                    .sabores(Set.of(sabor1, sabor2, sabor3, sabor4))
+                    .codigoAcesso("654321")
+                    .sabores(List.of(sabor1, sabor2, sabor3, sabor4))
                     .build();
             estabelecimentoRepository.save(estabelecimento1);
 

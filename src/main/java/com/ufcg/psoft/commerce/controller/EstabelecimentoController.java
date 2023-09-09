@@ -61,4 +61,14 @@ public class EstabelecimentoController {
                 .status(HttpStatus.OK)
                 .body(cardapioService.find(estabelecimentoPostDTO, id));
     }
+    @GetMapping("/{id}/sabores/tipo")
+    public ResponseEntity<?> cardapioTipoEstabelecimento(
+            @PathVariable Long id,
+            @RequestParam String tipo,
+            @RequestBody @Valid EstabelecimentoPostPutRequestDTO estabelecimentoPostDTO)
+    {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(cardapioService.findByTipo(estabelecimentoPostDTO, id, tipo));
+    }
 }

@@ -2,9 +2,10 @@ package com.ufcg.psoft.commerce.service.estabelecimento;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
+import java.util.List;
 
 @Component
 public interface EstabelecimentoMostrarCardapioService<T,E> {
-    Set<T> find(E estabelecimentoDTO, Long id);
+    List<T> find(E estabelecimentoDTO, Long id);
+    List<T> findByTipo(E estabelecimentoDTO, Long id, String tipo);
 }

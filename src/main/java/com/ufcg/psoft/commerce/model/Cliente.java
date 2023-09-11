@@ -23,16 +23,12 @@ public class Cliente {
     private Long id;
 
     @JsonProperty("nome")
-    @NotBlank(message = "Nome obrigatorio")
     private String nome;
 
     @JsonProperty("endereco")
-    @NotBlank(message = "Endereco obrigatorio")
     private String endereco;
 
-    @NumericString
     @JsonProperty("codigoAcesso")
-    @NotBlank(message = "Codigo de acesso obrigatorio")
     @Size(min = 6, max = 6, message = "Codigo de acesso deve ter exatamente 6 digitos numericos")
     private String codigoAcesso;
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ufcg.psoft.commerce.dto.Cliente.ClientePostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Cliente.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
-import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import jakarta.transaction.Transactional;
@@ -23,7 +22,7 @@ public class ClienteV1AlterarService implements ClienteAlterarService{
     @Override
     @Transactional
     public ClienteResponseDTO atualizar(String codigoAcesso, Long id, ClientePostPutRequestDTO cliente) {
-        Cliente delete = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
+        Cliente delete = repository.findById(id).orElseThrow(() -> new InvalidAccessException("O cliente consultado nao existe!"));
         if(!delete.getCodigoAcesso().equals(codigoAcesso)){
             throw new InvalidAccessException("Codigo de acesso invalido!");
         }

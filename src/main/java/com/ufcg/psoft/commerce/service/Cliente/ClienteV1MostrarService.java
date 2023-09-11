@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.service.Cliente;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ufcg.psoft.commerce.dto.Cliente.ClienteResponseDTO;
+import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
@@ -21,7 +22,7 @@ public class ClienteV1MostrarService implements ClienteMostrarService{
 
     @Override
     public ClienteResponseDTO lerCliente(Long id) {
-        Cliente retorno = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
+        Cliente retorno = repository.findById(id).orElseThrow(() -> new InvalidAccessException("O cliente consultado nao existe!"));
         return objectMapper.convertValue(retorno, ClienteResponseDTO.class);
     }
 

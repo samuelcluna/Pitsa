@@ -1,6 +1,4 @@
-package com.ufcg.psoft.commerce.service.estabelecimento;
-
-import org.springframework.stereotype.Component;
+package com.ufcg.psoft.commerce.service.Estabelecimento;
 
 @FunctionalInterface
 public interface EstabelecimentoCriarService<T, E> {

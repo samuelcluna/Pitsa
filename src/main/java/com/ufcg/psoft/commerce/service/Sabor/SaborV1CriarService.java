@@ -7,6 +7,7 @@ import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.model.Sabor;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import com.ufcg.psoft.commerce.repository.Sabor.SaborRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class SaborV1CriarService implements SaborCriarService {
     ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public Sabor criar(SaborPostPutRequestDTO requestDTO, Long idEstabelecimento, String codigoAcesso) {
         Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(idEstabelecimento)
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não existe."));

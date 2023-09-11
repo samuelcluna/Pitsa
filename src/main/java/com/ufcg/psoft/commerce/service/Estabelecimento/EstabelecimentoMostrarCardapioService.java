@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.service.estabelecimento;
+package com.ufcg.psoft.commerce.service.Estabelecimento;
 
 import org.springframework.stereotype.Component;
 

@@ -1,7 +1,7 @@
 package com.ufcg.psoft.commerce.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ufcg.psoft.commerce.dto.Cliente.validadorCodigo.NumericString;
+import com.ufcg.psoft.commerce.validadorCodigo.NumericString;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

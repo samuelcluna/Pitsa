@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.service.estabelecimento;
+package com.ufcg.psoft.commerce.service.Estabelecimento;
 
 @FunctionalInterface
 public interface EstabelecimentoAlterarService<T,E> {

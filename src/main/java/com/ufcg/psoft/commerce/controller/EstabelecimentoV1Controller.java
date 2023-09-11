@@ -1,7 +1,7 @@
 package com.ufcg.psoft.commerce.controller;
 
-import com.ufcg.psoft.commerce.dto.EstabelecimentoPostPutRequestDTO;
-import com.ufcg.psoft.commerce.service.estabelecimento.*;
+import com.ufcg.psoft.commerce.dto.Estabelecimento.EstabelecimentoPostPutRequestDTO;
+import com.ufcg.psoft.commerce.service.Estabelecimento.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
         value = "/estabelecimentos",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
-public class EstabelecimentoController {
+public class EstabelecimentoV1Controller {
 
     @Autowired
     EstabelecimentoV1CriarService criarService;

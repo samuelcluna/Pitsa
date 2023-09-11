@@ -1,8 +1,7 @@
-package com.ufcg.psoft.commerce.service.estabelecimento;
+package com.ufcg.psoft.commerce.service.Estabelecimento;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ufcg.psoft.commerce.dto.EstabelecimentoPostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.Estabelecimento.EstabelecimentoPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Sabor.SaborResponseDTO;
 import com.ufcg.psoft.commerce.exception.CommerceException;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;

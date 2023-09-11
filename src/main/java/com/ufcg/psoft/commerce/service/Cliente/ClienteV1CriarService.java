@@ -5,6 +5,7 @@ import com.ufcg.psoft.commerce.dto.Cliente.ClientePostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Cliente.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,9 @@ public class ClienteV1CriarService implements ClienteCriarService{
 
     @Autowired
     ObjectMapper objectMapper;
+
     @Override
+    @Transactional
     public ClienteResponseDTO criar(ClientePostPutRequestDTO cliente) {
         Cliente adicionado = repository.save(objectMapper.convertValue(cliente, Cliente.class));
         return objectMapper.convertValue(adicionado, ClienteResponseDTO.class);

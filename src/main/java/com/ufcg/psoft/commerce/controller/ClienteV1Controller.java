@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
         value = "/clientes",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
-public class ClienteV1RestController {
+public class ClienteV1Controller {
     @Autowired
     ClienteV1CriarService criarService;
     @Autowired

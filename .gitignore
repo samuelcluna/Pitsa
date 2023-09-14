@@ -4,4 +4,4 @@
 # Gradle
 .gradle/
 build/
-src/test
+src/test/

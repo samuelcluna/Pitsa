@@ -25,11 +25,11 @@ public class SaborPostPutRequestDTO {
 
     @JsonProperty("precoM")
     @Positive
-    double precoM;
+    Double precoM;
 
     @JsonProperty("precoG")
     @Positive
-    double precoG;
+    Double precoG;
 
     @JsonProperty("disponivel")
     @AssertTrue

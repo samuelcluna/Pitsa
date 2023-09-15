@@ -3,6 +3,13 @@ package com.ufcg.psoft.commerce.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.ufcg.psoft.commerce.dto.Sabor.SaborPostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.Sabor.SaborResponseDTO;
+import com.ufcg.psoft.commerce.exception.CustomErrorType;
+import com.ufcg.psoft.commerce.model.Estabelecimento;
+import com.ufcg.psoft.commerce.model.Sabor;
+import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
+import com.ufcg.psoft.commerce.repository.Sabor.SaborRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -40,12 +46,18 @@ public class SaborControllerTests {
     @BeforeEach
     void setup() {
         objectMapper.registerModule(new JavaTimeModule());
+
+        estabelecimento = estabelecimentoRepository.save(Estabelecimento.builder()
+                .codigoAcesso("654321")
+                .build());
+
         sabor = saborRepository.save(Sabor.builder()
                 .nome("Calabresa")
                 .tipo("salgado")
                 .precoM(10.0)
                 .precoG(15.0)
                 .disponivel(true)
+                .estabelecimento(estabelecimento)
                 .build());
         saborPostPutRequestDTO = SaborPostPutRequestDTO.builder()
                 .nome(sabor.getNome())
@@ -54,9 +66,7 @@ public class SaborControllerTests {
                 .precoG(sabor.getPrecoG())
                 .disponivel(sabor.isDisponivel())
                 .build();
-        estabelecimento = estabelecimentoRepository.save(Estabelecimento.builder()
-                .codigoAcesso("654321")
-                .build());
+        estabelecimento.setSabores(List.of(sabor));
     }
 
     @AfterEach

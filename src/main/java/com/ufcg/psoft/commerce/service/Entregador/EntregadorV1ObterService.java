@@ -21,7 +21,7 @@ public class EntregadorV1ObterService implements EntregadorObterService {
     ModelMapper modelMapper;
 
     @Override
-    public List<EntregadorResponseDTO> obter(Long id) {
+    public List<EntregadorResponseDTO> find(Long id) {
         if (id != null && id > 0) {
             Entregador entregador = entregadorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O entregador consultado nao existe!"));
             return List.of(new EntregadorResponseDTO(entregador));

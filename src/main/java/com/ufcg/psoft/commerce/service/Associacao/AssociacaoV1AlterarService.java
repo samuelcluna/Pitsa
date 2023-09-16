@@ -22,7 +22,7 @@ public class AssociacaoV1AlterarService implements AssociacaoAlterarService{
     @Autowired
     private EntregadorRepository entregadorRepository;
 
-    public Associacao alterar(Long entregadorId, Long estabelecimentoId, String codigoAcesso){
+    public Associacao update(Long entregadorId, Long estabelecimentoId, String codigoAcesso){
         Entregador entregador = entregadorRepository.findById(entregadorId).orElseThrow(
                 ()-> new CommerceException("O entregador consultado nao existe!"));
 

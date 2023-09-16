@@ -4,5 +4,5 @@ import com.ufcg.psoft.commerce.model.Associacao;
 
 @FunctionalInterface
 public interface AssociacaoAlterarService {
-    public Associacao alterar(Long entregadorId, Long estabelecimentoId, String codigoAcesso);
+    public Associacao update(Long entregadorId, Long estabelecimentoId, String codigoAcesso);
 }

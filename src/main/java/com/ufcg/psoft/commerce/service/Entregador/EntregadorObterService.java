@@ -6,5 +6,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface EntregadorObterService {
-    List<EntregadorResponseDTO> obter(Long id);
+    List<EntregadorResponseDTO> find(Long id);
 }

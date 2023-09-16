@@ -5,5 +5,5 @@ import com.ufcg.psoft.commerce.model.Entregador;
 
 @FunctionalInterface
 public interface EntregadorAlterarService {
-    Entregador alterar(Long id, EntregadorPostPutRequestDTO entregadorPostPutRequestDTO, String codigoAcesso);
+    Entregador update(Long id, EntregadorPostPutRequestDTO entregadorPostPutRequestDTO, String codigoAcesso);
 }

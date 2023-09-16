@@ -22,7 +22,7 @@ public class AssociacaoV1CriarService implements AssociacaoCriarService{
     @Autowired
     public EstabelecimentoRepository estabelecimentoRepository;
 
-    public Associacao criar(Long entregadorId, Long estabelecimentoId, String codigoAcesso){
+    public Associacao save(Long entregadorId, Long estabelecimentoId, String codigoAcesso){
         Entregador entregador = entregadorRepository.findById(entregadorId).orElseThrow(
                 ()-> new CommerceException("O entregador consultado nao existe!"));
 

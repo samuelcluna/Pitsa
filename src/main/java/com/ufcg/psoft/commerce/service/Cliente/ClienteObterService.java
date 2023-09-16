@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public interface ClienteMostrarService {
-    public ClienteResponseDTO lerCliente(Long id);
+public interface ClienteObterService {
+    public ClienteResponseDTO find(Long id);
 
-    public List<Cliente> lerClientes();
+    public List<Cliente> findAll();
 }

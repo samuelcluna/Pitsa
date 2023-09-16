@@ -20,7 +20,7 @@ public class ClienteV1CriarService implements ClienteCriarService{
 
     @Override
     @Transactional
-    public ClienteResponseDTO criar(ClientePostPutRequestDTO cliente) {
+    public ClienteResponseDTO save(ClientePostPutRequestDTO cliente) {
         Cliente adicionado = repository.save(objectMapper.convertValue(cliente, Cliente.class));
         return objectMapper.convertValue(adicionado, ClienteResponseDTO.class);
     }

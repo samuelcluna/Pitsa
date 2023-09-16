@@ -4,5 +4,5 @@ import com.ufcg.psoft.commerce.dto.Cliente.ClientePostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Cliente.ClienteResponseDTO;
 @FunctionalInterface
 public interface ClienteCriarService {
-    ClienteResponseDTO criar(ClientePostPutRequestDTO cliente);
+    ClienteResponseDTO save(ClientePostPutRequestDTO cliente);
 }

@@ -23,7 +23,7 @@ public class EstabelecimentoV1Controller {
     @Autowired
     EstabelecimentoV1AlterarService alterarService;
     @Autowired
-    EstabelecimentoV1MostrarCadarpioService cardapioService;
+    EstabelecimentoV1ObterCadarpioService cardapioService;
 
     @PostMapping()
     public ResponseEntity<?> criarEstabelecimento(

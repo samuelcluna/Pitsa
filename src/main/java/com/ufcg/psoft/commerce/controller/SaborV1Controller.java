@@ -33,23 +33,23 @@ public class SaborV1Controller {
     SaborObterService saborObterService;
 
     @PostMapping
-    public ResponseEntity<Sabor> criarSabor(
-            @RequestParam Long idEstabelecimento,
-            @RequestParam String codigoAcesso,
+    public ResponseEntity<?> criarSabor(
+            @RequestParam Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso,
             @RequestBody @Valid SaborPostPutRequestDTO saborPostPutRequestDTO
     ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(criarService.criar(saborPostPutRequestDTO, idEstabelecimento, codigoAcesso));
+                .body(criarService.save(saborPostPutRequestDTO, estabelecimentoId, estabelecimentoCodigoAcesso));
     }
 
     @DeleteMapping
     public ResponseEntity<?> deletarSabor(
-            @RequestParam Long idSabor,
-            @RequestParam Long idEstabelecimento,
-            @RequestParam String codigoAcesso
+            @RequestParam Long saborId,
+            @RequestParam Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso
     ) {
-        deletarService.deletar(idSabor, idEstabelecimento, codigoAcesso);
+        deletarService.delete(saborId, estabelecimentoId, estabelecimentoCodigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();
@@ -57,35 +57,35 @@ public class SaborV1Controller {
 
     @PutMapping
     public ResponseEntity<?> alterarSabor(
-            @RequestParam Long idSabor,
-            @RequestParam Long idEstabelecimento,
-            @RequestParam String codigoAcesso,
+            @RequestParam Long saborId,
+            @RequestParam Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso,
             @RequestBody @Valid SaborPostPutRequestDTO saborPostPutRequestDTO
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarService.alterar(idSabor, idEstabelecimento, codigoAcesso, saborPostPutRequestDTO));
+                .body(alterarService.update(saborId, estabelecimentoId, estabelecimentoCodigoAcesso, saborPostPutRequestDTO));
     }
 
     @GetMapping
     public ResponseEntity<?> obterSabores(
-            @RequestParam Long idEstabelecimento,
-            @RequestParam String codigoAcesso
+            @RequestParam Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(saborObterService.obterTodos(idEstabelecimento, codigoAcesso));
+                .body(saborObterService.findAll(estabelecimentoId, estabelecimentoCodigoAcesso));
     }
 
-    @GetMapping("{idSabor}")
+    @GetMapping("{saborId}")
     public ResponseEntity<?> obterSabores(
-            @PathVariable Long idSabor,
-            @RequestParam Long idEstabelecimento,
-            @RequestParam String codigoAcesso
+            @PathVariable Long saborId,
+            @RequestParam Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(saborObterService.obter(idSabor, idEstabelecimento, codigoAcesso));
+                .body(saborObterService.find(saborId, estabelecimentoId, estabelecimentoCodigoAcesso));
     }
 
 }

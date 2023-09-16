@@ -10,7 +10,7 @@ import com.ufcg.psoft.commerce.exception.CustomErrorType;
 import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.model.Sabor;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
-import com.ufcg.psoft.commerce.service.Estabelecimento.EstabelecimentoV1MostrarCadarpioService;
+import com.ufcg.psoft.commerce.service.Estabelecimento.EstabelecimentoV1ObterCadarpioService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,7 +36,7 @@ public class EstabelecimentoControllerTests {
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
     @Autowired
-    EstabelecimentoV1MostrarCadarpioService estabelecimentoV1MostrarCadarpioService;
+    EstabelecimentoV1ObterCadarpioService estabelecimentoV1ObterCadarpioService;
 
     ObjectMapper objectMapper = new ObjectMapper();
 

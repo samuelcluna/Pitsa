@@ -19,7 +19,7 @@ public class EntregadorV1CriarService implements EntregadorCriarService {
 
     @Override
     @Transactional
-    public Entregador criar(EntregadorPostPutRequestDTO entregadorPostPutRequestDTO) {
+    public Entregador save(EntregadorPostPutRequestDTO entregadorPostPutRequestDTO) {
         Entregador entregador = modelMapper.map(entregadorPostPutRequestDTO, Entregador.class);
         return entregadorRepository.save(entregador);
     }

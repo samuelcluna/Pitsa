@@ -3,8 +3,8 @@ package com.ufcg.psoft.commerce.controller;
 import com.ufcg.psoft.commerce.dto.Cliente.ClientePostPutRequestDTO;
 import com.ufcg.psoft.commerce.service.Cliente.ClienteV1AlterarService;
 import com.ufcg.psoft.commerce.service.Cliente.ClienteV1CriarService;
-import com.ufcg.psoft.commerce.service.Cliente.ClienteV1DeleteService;
-import com.ufcg.psoft.commerce.service.Cliente.ClienteV1MostrarService;
+import com.ufcg.psoft.commerce.service.Cliente.ClienteV1DeletarService;
+import com.ufcg.psoft.commerce.service.Cliente.ClienteV1ObterService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,16 +23,16 @@ public class ClienteV1Controller {
     @Autowired
     ClienteV1AlterarService alterarService;
     @Autowired
-    ClienteV1DeleteService deleteService;
+    ClienteV1DeletarService deletarService;
     @Autowired
-    ClienteV1MostrarService mostrarService;
+    ClienteV1ObterService obterService;
 
     @PostMapping()
     public ResponseEntity<?> criarCliente(
             @RequestBody @Valid ClientePostPutRequestDTO adicionar){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(criarService.criar(adicionar));
+                .body(criarService.save(adicionar));
     }
 
     @DeleteMapping("/{id}")
@@ -40,7 +40,7 @@ public class ClienteV1Controller {
             @PathVariable Long id,
             @RequestParam String codigoAcesso
             ) {
-        deleteService.delete(id,codigoAcesso);
+        deletarService.delete(id,codigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();
@@ -53,7 +53,7 @@ public class ClienteV1Controller {
             @RequestBody @Valid ClientePostPutRequestDTO cliente) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarService.atualizar(codigoAcesso, id, cliente));
+                .body(alterarService.update(codigoAcesso, id, cliente));
     }
 
     @GetMapping("/{id}")
@@ -62,7 +62,7 @@ public class ClienteV1Controller {
     {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(mostrarService.lerCliente(id));
+                .body(obterService.find(id));
     }
 
     @GetMapping()
@@ -70,7 +70,7 @@ public class ClienteV1Controller {
     {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(mostrarService.lerClientes());
+                .body(obterService.findAll());
     }
 
 }

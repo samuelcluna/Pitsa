@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class EstabelecimentoV1MostrarCadarpioService implements EstabelecimentoMostrarCardapioService<SaborResponseDTO, EstabelecimentoPostPutRequestDTO>{
+public class EstabelecimentoV1ObterCadarpioService implements EstabelecimentoMostrarCardapioService<SaborResponseDTO, EstabelecimentoPostPutRequestDTO>{
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
     @Autowired
@@ -26,9 +26,8 @@ public class EstabelecimentoV1MostrarCadarpioService implements EstabelecimentoM
     ModelMapper modelMapper;
     @Override
     public List<SaborResponseDTO> find(EstabelecimentoPostPutRequestDTO estabelecimentoPostRequestDTO, Long id){
-        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
-        if(!estabelecimentoExistente.getCodigoAcesso().equals(estabelecimentoPostRequestDTO.getCodigoAcesso()))
-            throw new InvalidAccessException("Codigo de acesso difere");
+        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
 
         List<SaborResponseDTO> sabores = new ArrayList<>();
 
@@ -44,17 +43,18 @@ public class EstabelecimentoV1MostrarCadarpioService implements EstabelecimentoM
     }
     @Override
     public List<SaborResponseDTO> findByTipo(EstabelecimentoPostPutRequestDTO  estabelecimentoPostRequestDTO, Long id, String tipo){
-        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
-        if(!estabelecimentoExistente.getCodigoAcesso().equals(estabelecimentoPostRequestDTO.getCodigoAcesso()))
-            throw new InvalidAccessException("Codigo de acesso difere.");
+        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
+
         if(!(tipo.equals("salgado") || (tipo.equals("doce"))))
-            throw new CommerceException("");
+            throw new CommerceException("Tipo deve ser salgado ou doce");
         List<SaborResponseDTO> sabores = new ArrayList<>();
 
         for(Sabor sabor : estabelecimentoExistente.getSabores()) {
             if(sabor.isDisponivel() && sabor.getTipo().equals(tipo))
                 sabores.add(modelMapper.map(sabor, SaborResponseDTO.class));
         }
+
         for(Sabor sabor : estabelecimentoExistente.getSabores()) {
             if(!(sabor.isDisponivel()) && sabor.getTipo().equals(tipo))
                 sabores.add(modelMapper.map(sabor, SaborResponseDTO.class));

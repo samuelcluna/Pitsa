@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.service.Estabelecimento;
 
+import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import jakarta.transaction.Transactional;
@@ -15,7 +16,8 @@ public class EstabelecimentoV1DeleteService implements EstabelecimentoDeleteServ
     @Override
     @Transactional
     public void delete(Long id, String codigoAcesso){
-        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(id).orElseThrow(RuntimeException::new);
+        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
         if(!estabelecimentoExistente.getCodigoAcesso().equals(codigoAcesso)) throw new RuntimeException();
         estabelecimentoRepository.deleteById(id);
     }

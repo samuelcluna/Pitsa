@@ -20,7 +20,7 @@ public class EntregadorV1DeletarService implements EntregadorDeletarService {
 
     @Override
     @Transactional
-    public void deletar(Long id, String codigoAcesso) {
+    public void delete(Long id, String codigoAcesso) {
         Entregador entregador = entregadorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O entregador consultado nao existe!"));
         if (!entregador.getCodigoAcesso().equals(codigoAcesso)) {
             throw new InvalidAccessException(("Codigo de acesso invalido!"));

@@ -30,7 +30,7 @@ public class AssociacaoV1Controller {
             ){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(criarService.criar(entregadorId, estabelecimentoId, codigoAcesso));
+                .body(criarService.save(entregadorId, estabelecimentoId, codigoAcesso));
     }
 
     @PutMapping
@@ -41,6 +41,6 @@ public class AssociacaoV1Controller {
     ){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarAssociacao.alterar(entregadorId, estabelecimentoId, codigoAcesso));
+                .body(alterarAssociacao.update(entregadorId, estabelecimentoId, codigoAcesso));
     }
 }

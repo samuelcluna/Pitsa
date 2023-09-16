@@ -30,7 +30,7 @@ public class EntregadorV1Controller {
             @RequestBody @Valid EntregadorPostPutRequestDTO entregadorPostPutRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(entregadorCriarService.criar(entregadorPostPutRequestDto));
+                .body(entregadorCriarService.save(entregadorPostPutRequestDto));
     }
 
     @GetMapping("/{id}")
@@ -38,14 +38,14 @@ public class EntregadorV1Controller {
             @PathVariable Long id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(entregadorObterService.obter(id));
+                .body(entregadorObterService.find(id));
     }
 
     @GetMapping("")
     public ResponseEntity<?> obterTodosEntregadores() {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(entregadorObterService.obter(null));
+                .body(entregadorObterService.find(null));
     }
 
     @PutMapping("/{id}")
@@ -55,7 +55,7 @@ public class EntregadorV1Controller {
             @RequestBody @Valid EntregadorPostPutRequestDTO entregadorPostPutRequestDto) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(entregadorAlterarService.alterar(id, entregadorPostPutRequestDto, codigoAcesso));
+                .body(entregadorAlterarService.update(id, entregadorPostPutRequestDto, codigoAcesso));
     }
 
     @DeleteMapping("/{id}")
@@ -63,7 +63,7 @@ public class EntregadorV1Controller {
             @PathVariable Long id,
             @RequestParam String codigoAcesso
     ) {
-        entregadorDeletarService.deletar(id, codigoAcesso);
+        entregadorDeletarService.delete(id, codigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body("");

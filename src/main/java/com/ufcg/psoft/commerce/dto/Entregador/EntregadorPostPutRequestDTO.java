@@ -31,7 +31,7 @@ public class EntregadorPostPutRequestDTO {
 
     @JsonProperty("tipoVeiculo")
     @NotBlank(message = "Tipo do veiculo e obrigatorio")
-    @Pattern(regexp = "moto|carro", message = "Tipo do veiculo deve ser moto ou carro")
+    @Pattern(regexp = "^(moto|carro)$", message = "Tipo do veiculo deve ser moto ou carro")
     private String tipoVeiculo;
 
     @JsonProperty("corVeiculo")

@@ -21,7 +21,7 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
 
     @Override
     @Transactional
-    public Entregador alterar(Long id, EntregadorPostPutRequestDTO entregadorPostPutRequestDTO, String codigoAcesso) {
+    public Entregador update(Long id, EntregadorPostPutRequestDTO entregadorPostPutRequestDTO, String codigoAcesso) {
 
         Entregador entregador = entregadorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O entregador consultado nao existe!"));
         if (!entregador.getCodigoAcesso().equals(codigoAcesso)) {

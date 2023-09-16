@@ -5,5 +5,5 @@ import com.ufcg.psoft.commerce.model.Entregador;
 
 @FunctionalInterface
 public interface EntregadorCriarService {
-    Entregador criar(EntregadorPostPutRequestDTO entregadorPostPutRequestDTO);
+    Entregador save(EntregadorPostPutRequestDTO entregadorPostPutRequestDTO);
 }

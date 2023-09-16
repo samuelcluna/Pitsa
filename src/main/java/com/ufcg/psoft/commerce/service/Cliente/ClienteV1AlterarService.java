@@ -21,8 +21,8 @@ public class ClienteV1AlterarService implements ClienteAlterarService{
 
     @Override
     @Transactional
-    public ClienteResponseDTO atualizar(String codigoAcesso, Long id, ClientePostPutRequestDTO cliente) {
-        Cliente delete = repository.findById(id).orElseThrow(() -> new InvalidAccessException("O cliente consultado nao existe!"));
+    public ClienteResponseDTO update(String codigoAcesso, Long idCliente, ClientePostPutRequestDTO cliente) {
+        Cliente delete = repository.findById(idCliente).orElseThrow(() -> new InvalidAccessException("O cliente consultado nao existe!"));
         if(!delete.getCodigoAcesso().equals(codigoAcesso)){
             throw new InvalidAccessException("Codigo de acesso invalido!");
         }

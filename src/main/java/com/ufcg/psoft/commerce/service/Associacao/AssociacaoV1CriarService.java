@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.service.Associacao;
 
+import com.ufcg.psoft.commerce.dto.Associacao.AssociacaoResponseDTO;
 import com.ufcg.psoft.commerce.exception.CommerceException;
 import com.ufcg.psoft.commerce.model.Associacao;
 import com.ufcg.psoft.commerce.model.Entregador;
@@ -7,6 +8,7 @@ import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.repository.AssociacaoRepository;
 import com.ufcg.psoft.commerce.repository.EntregadorRepository;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,15 +16,18 @@ import org.springframework.stereotype.Service;
 public class AssociacaoV1CriarService implements AssociacaoCriarService{
 
     @Autowired
-    public AssociacaoRepository associacaoRepository;
+    AssociacaoRepository associacaoRepository;
 
     @Autowired
-    public EntregadorRepository entregadorRepository;
+    EntregadorRepository entregadorRepository;
 
     @Autowired
-    public EstabelecimentoRepository estabelecimentoRepository;
+    EstabelecimentoRepository estabelecimentoRepository;
 
-    public Associacao criar(Long entregadorId, Long estabelecimentoId, String codigoAcesso){
+    @Autowired
+    ModelMapper modelMapper;
+
+    public AssociacaoResponseDTO save(Long entregadorId, Long estabelecimentoId, String codigoAcesso){
         Entregador entregador = entregadorRepository.findById(entregadorId).orElseThrow(
                 ()-> new CommerceException("O entregador consultado nao existe!"));
 
@@ -38,6 +43,6 @@ public class AssociacaoV1CriarService implements AssociacaoCriarService{
                 .entregador(entregador)
                 .build();
 
-        return associacaoRepository.save(associacao);
+        return modelMapper.map(associacaoRepository.save(associacao), AssociacaoResponseDTO.class);
     }
 }

@@ -22,7 +22,7 @@ public class SaborV1DeletarService implements SaborDeletarService {
 
     @Override
     @Transactional
-    public void deletar(Long idSabor, Long idEstabelecimento, String codigoAcesso) {
+    public void delete(Long idSabor, Long idEstabelecimento, String codigoAcesso) {
         Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(idEstabelecimento)
                 .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não existe."));
         if (!estabelecimentoExistente.getCodigoAcesso().equals(codigoAcesso)) {
@@ -30,7 +30,7 @@ public class SaborV1DeletarService implements SaborDeletarService {
         }
 
         if (!saborRepository.existsByIdAndEstabelecimentoId(idSabor, idEstabelecimento)) {
-            throw new RelationshipNotFoundException("Associação inválida!");
+            throw new ResourceNotFoundException("O sabor consultado nao existe!");
         }
 
         Sabor saborRemover = saborRepository.findById(idSabor)

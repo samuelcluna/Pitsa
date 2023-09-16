@@ -343,7 +343,7 @@ public class ClienteControllerTests {
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
-            List<Cliente> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
+            List<ClienteResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
             });
 
             // Assert

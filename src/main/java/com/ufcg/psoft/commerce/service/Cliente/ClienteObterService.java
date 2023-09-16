@@ -1,7 +1,6 @@
 package com.ufcg.psoft.commerce.service.Cliente;
 
 import com.ufcg.psoft.commerce.dto.Cliente.ClienteResponseDTO;
-import com.ufcg.psoft.commerce.model.Cliente;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -10,5 +9,5 @@ import java.util.List;
 public interface ClienteObterService {
     public ClienteResponseDTO find(Long id);
 
-    public List<Cliente> findAll();
+    public List<ClienteResponseDTO> findAll();
 }

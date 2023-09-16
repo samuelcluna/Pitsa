@@ -8,6 +8,7 @@ import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,7 +27,12 @@ public class ClienteV1ObterService implements ClienteObterService {
     }
 
     @Override
-    public List<Cliente> findAll() {
-        return repository.findAll();
+    public List<ClienteResponseDTO> findAll() {
+        List<ClienteResponseDTO> retorno = new ArrayList<>();
+        List<Cliente> clientes = repository.findAll();
+        for(Cliente cliente: clientes){
+            retorno.add(objectMapper.convertValue(cliente, ClienteResponseDTO.class));
+        }
+        return retorno;
     }
 }

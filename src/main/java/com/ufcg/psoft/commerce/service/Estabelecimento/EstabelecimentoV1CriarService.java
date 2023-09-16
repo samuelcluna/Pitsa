@@ -22,9 +22,12 @@ public class EstabelecimentoV1CriarService implements EstabelecimentoCriarServic
     @Override
     @Transactional
     public EstabelecimentoResponseDTO save(EstabelecimentoPostPutRequestDTO estabelecimentoPostDTO, String codigoDeAcesso){
+
         if(!codigoDeAcesso.equals(estabelecimentoPostDTO.getCodigoAcesso()))
-            throw new InvalidAccessException("");
+            throw new InvalidAccessException("Codigo de acesso invalido!");
+
         Estabelecimento estabelecimento = estabelecimentoRepository.save(objectMapper.convertValue(estabelecimentoPostDTO, Estabelecimento.class));
+
         return objectMapper.convertValue(estabelecimento, EstabelecimentoResponseDTO.class);
     }
 }

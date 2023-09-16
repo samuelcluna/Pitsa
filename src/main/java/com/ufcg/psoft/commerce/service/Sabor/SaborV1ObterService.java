@@ -21,13 +21,13 @@ import java.util.Set;
 public class SaborV1ObterService implements SaborObterService{
 
     @Autowired
-    EstabelecimentoRepository estabelecimentoRepository;
+    private EstabelecimentoRepository estabelecimentoRepository;
 
     @Autowired
-    SaborRepository saborRepository;
+    private SaborRepository saborRepository;
 
     @Autowired
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
 
     @Override
     @Transactional

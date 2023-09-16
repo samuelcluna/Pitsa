@@ -225,7 +225,27 @@ public class SaborControllerTests {
                     () -> assertEquals(saborPostPutRequestDTO.getDisponivel(), resultado.isDisponivel())
             );
         }
+        @Test
+        @DisplayName("Quando criamos um novo sabor com dados válidos")
+        void quandoCriarSaborCodigoAcessoInvalido() throws Exception {
+            // Arrange
+            // nenhuma necessidade além do setup()
 
+            // Act
+            String responseJsonString = driver.perform(post(URI_SABORES)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoId", estabelecimento.getId().toString())
+                            .param("estabelecimentoCodigoAcesso", "457894")
+                            .content(objectMapper.writeValueAsString(saborPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest()) // Codigo 400
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals(resultado.getMessage(), "Codigo de acesso invalido!");
+        }
         @Test
         @DisplayName("Quando alteramos o sabor com dados válidos")
         void quandoAlteramosSaborValido() throws Exception {
@@ -507,6 +527,35 @@ public class SaborControllerTests {
                     () -> assertEquals("Tipo deve ser salgado ou doce", resultado.getErrors().get(0))
             );
         }
+    }
+    @Test
+    @DisplayName("Quando alteramos um sabor com tipo válido")
+    void quandoAlteramosSaborNaoExisteEmEstabelecimento() throws Exception {
+        // Arrange
+        saborPostPutRequestDTO.setTipo("salgado");
+        Sabor sabor1 = Sabor.builder()
+                .nome("Nutella")
+                .tipo("doce")
+                .precoM(50.00)
+                .precoG(60.00)
+                .disponivel(true)
+                .build();
+        saborRepository.save(sabor1);
+        // Act
+        String responseJsonString = driver.perform(put(URI_SABORES)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("saborId", sabor1.getId().toString())
+                        .param("estabelecimentoId", estabelecimento.getId().toString())
+                        .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
+                        .content(objectMapper.writeValueAsString(saborPostPutRequestDTO)))
+                .andExpect(status().isNotFound()) // Codigo 404
+                .andDo(print())
+                .andReturn().getResponse().getContentAsString();
+
+        CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+        // Assert
+        assertEquals(resultado.getMessage(), "Sabor não existe para esse estabelecimento!");
     }
 
     @Nested

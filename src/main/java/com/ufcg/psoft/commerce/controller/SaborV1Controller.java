@@ -67,6 +67,17 @@ public class SaborV1Controller {
                 .body(alterarService.update(saborId, estabelecimentoId, estabelecimentoCodigoAcesso, saborPostPutRequestDTO));
     }
 
+    @PatchMapping("/disponibilidade")
+    public ResponseEntity<?> alterarDisponibilidade(
+            @RequestParam Long saborId,
+            @RequestParam Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso,
+            @RequestParam Boolean disponibilidade
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(alterarDisponibilidadeService.update(saborId, estabelecimentoId, estabelecimentoCodigoAcesso,disponibilidade));
+    }
     @GetMapping
     public ResponseEntity<?> obterSabores(
             @RequestParam Long estabelecimentoId,

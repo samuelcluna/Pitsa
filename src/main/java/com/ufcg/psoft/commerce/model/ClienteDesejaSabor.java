@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "clientes")
+@Table(name = "clienteDesejaSabor")
 public class ClienteDesejaSabor {
 
     @Id
@@ -20,15 +20,13 @@ public class ClienteDesejaSabor {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(nullable = false)
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "cliente_id")
-    @JsonProperty("id_sabor")
+    @JoinColumn(name = "sabor_id", nullable = false)
+    @JsonProperty("saborId")
     private Sabor sabor;
 
-    @Column(nullable = false)
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "cliente_id")
-    @JsonProperty("id_cliente")
+    @JoinColumn(name = "cliente_id", nullable = false)
+    @JsonProperty("clienteId")
     private Cliente cliente;
 }

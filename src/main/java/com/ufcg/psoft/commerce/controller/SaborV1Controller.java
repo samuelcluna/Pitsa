@@ -1,11 +1,9 @@
 package com.ufcg.psoft.commerce.controller;
 
+import com.ufcg.psoft.commerce.dto.Sabor.SaborPatchRequestDTO;
 import com.ufcg.psoft.commerce.dto.Sabor.SaborPostPutRequestDTO;
 import com.ufcg.psoft.commerce.model.Sabor;
-import com.ufcg.psoft.commerce.service.Sabor.SaborAlterarService;
-import com.ufcg.psoft.commerce.service.Sabor.SaborCriarService;
-import com.ufcg.psoft.commerce.service.Sabor.SaborDeletarService;
-import com.ufcg.psoft.commerce.service.Sabor.SaborObterService;
+import com.ufcg.psoft.commerce.service.Sabor.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +29,9 @@ public class SaborV1Controller {
 
     @Autowired
     SaborObterService saborObterService;
+
+    @Autowired
+    SaborAlterarDisponibilidadeService alterarDisponibilidadeService;
 
     @PostMapping
     public ResponseEntity<?> criarSabor(
@@ -72,11 +73,11 @@ public class SaborV1Controller {
             @RequestParam Long saborId,
             @RequestParam Long estabelecimentoId,
             @RequestParam String estabelecimentoCodigoAcesso,
-            @RequestParam Boolean disponibilidade
-    ) {
+            @RequestBody @Valid SaborPatchRequestDTO saborPatchRequestDTO
+            ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarDisponibilidadeService.update(saborId, estabelecimentoId, estabelecimentoCodigoAcesso,disponibilidade));
+                .body(alterarDisponibilidadeService.update(saborId, estabelecimentoId, estabelecimentoCodigoAcesso, saborPatchRequestDTO));
     }
     @GetMapping
     public ResponseEntity<?> obterSabores(

@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.service.Sabor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ufcg.psoft.commerce.dto.Sabor.SaborPatchRequestDTO;
 import com.ufcg.psoft.commerce.dto.Sabor.SaborResponseDTO;
 import com.ufcg.psoft.commerce.exception.CommerceException;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
@@ -19,29 +20,36 @@ public class SaborV1AlterarDisponibilidadeService implements SaborAlterarDisponi
 
     @Autowired
     SaborRepository saborRepository;
+
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
+
     @Autowired
-    ObjectMapper objectMapper;
+    ModelMapper modelMapper;
+
 
     @Override
     @Transactional
     public SaborResponseDTO update(Long saborId, Long estabelecimentoId, String estabelecimentoCodigoAcesso,
-                                   Boolean disponibilidade){
+                                   SaborPatchRequestDTO saborPatchRequestDTO){
 
         Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(estabelecimentoId)
-                .orElseThrow(() -> new ResourceNotFoundException(""));
+                .orElseThrow(() -> new ResourceNotFoundException("Estabelecimento nao encontrado"));
 
         if(!estabelecimentoExistente.getCodigoAcesso().equals(estabelecimentoCodigoAcesso))
-            throw new InvalidAccessException("");
+            throw new InvalidAccessException("Codigo de acesso invalido!");
 
         Sabor saborExistente = saborRepository.findByIdAndEstabelecimentoId(saborId, estabelecimentoId)
-                .orElseThrow(() -> new ResourceNotFoundException(""));
+                .orElseThrow(() -> new ResourceNotFoundException("Sabor nao encontrado"));
 
-        if(saborExistente.getDisponivel().equals(disponibilidade))
-            throw new CommerceException("");
-        saborExistente.setDisponivel(disponibilidade);
+        if(saborExistente.getDisponivel().equals(saborPatchRequestDTO.getDisponivel()))
+            if(saborPatchRequestDTO.getDisponivel().equals(true))
+                throw new CommerceException("O sabor consultado ja esta disponivel!");
+            else
+                throw  new CommerceException("O sabor consultado ja esta indisponivel!");
 
-        return objectMapper.convertValue(saborRepository.save(saborExistente),SaborResponseDTO.class);
+        saborExistente.setDisponivel(saborPatchRequestDTO.getDisponivel());
+
+        return modelMapper.map(saborRepository.save(saborExistente),SaborResponseDTO.class);
     }
 }

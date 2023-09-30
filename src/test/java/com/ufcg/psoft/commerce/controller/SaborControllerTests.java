@@ -3,12 +3,22 @@ package com.ufcg.psoft.commerce.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.ufcg.psoft.commerce.dto.Sabor.SaborPatchRequestDTO;
+import com.ufcg.psoft.commerce.dto.Sabor.SaborPostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.Sabor.SaborResponseDTO;
+import com.ufcg.psoft.commerce.exception.CustomErrorType;
+import com.ufcg.psoft.commerce.model.Estabelecimento;
+import com.ufcg.psoft.commerce.model.Sabor;
+import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
+import com.ufcg.psoft.commerce.repository.Sabor.SaborRepository;
 import org.junit.jupiter.api.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,21 +42,29 @@ public class SaborControllerTests {
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
 
+    ModelMapper modelMapper = new ModelMapper();
     ObjectMapper objectMapper = new ObjectMapper();
     Sabor sabor;
     Estabelecimento estabelecimento;
     SaborPostPutRequestDTO saborPostPutRequestDTO;
 
+    SaborPatchRequestDTO saborPatchRequestDTO;
+
     @BeforeEach
     void setup() {
         objectMapper.registerModule(new JavaTimeModule());
+        estabelecimento = estabelecimentoRepository.save(Estabelecimento.builder()
+                .codigoAcesso("654321")
+                .build());
         sabor = saborRepository.save(Sabor.builder()
                 .nome("Calabresa")
                 .tipo("salgado")
                 .precoM(10.0)
                 .precoG(15.0)
                 .disponivel(true)
+                .estabelecimento(estabelecimento)
                 .build());
+        estabelecimento.setSabores(List.of(sabor));
         saborPostPutRequestDTO = SaborPostPutRequestDTO.builder()
                 .nome(sabor.getNome())
                 .tipo(sabor.getTipo())
@@ -54,9 +72,9 @@ public class SaborControllerTests {
                 .precoG(sabor.getPrecoG())
                 .disponivel(sabor.isDisponivel())
                 .build();
-        estabelecimento = estabelecimentoRepository.save(Estabelecimento.builder()
-                .codigoAcesso("654321")
-                .build());
+        saborPatchRequestDTO = SaborPatchRequestDTO.builder()
+                .disponivel(true)
+                .build();
     }
 
     @AfterEach
@@ -80,6 +98,7 @@ public class SaborControllerTests {
                     .precoM(10.0)
                     .precoG(15.0)
                     .disponivel(true)
+                    .estabelecimento(estabelecimento)
                     .build();
             Sabor sabor2 = Sabor.builder()
                     .nome("Frango")
@@ -87,9 +106,10 @@ public class SaborControllerTests {
                     .precoM(10.0)
                     .precoG(15.0)
                     .disponivel(true)
+                    .estabelecimento(estabelecimento)
                     .build();
             saborRepository.saveAll(Arrays.asList(sabor1, sabor2));
-
+            estabelecimento.setSabores(List.of(sabor,sabor1, sabor2));
             // Act
             String responseJsonString = driver.perform(get(URI_SABORES)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +169,7 @@ public class SaborControllerTests {
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
                             .content(objectMapper.writeValueAsString(saborPostPutRequestDTO)))
-                    .andExpect(status().isBadRequest()) // Codigo 400
+                    .andExpect(status().isNotFound()) // Codigo 404
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
@@ -212,7 +232,27 @@ public class SaborControllerTests {
                     () -> assertEquals(saborPostPutRequestDTO.getDisponivel(), resultado.isDisponivel())
             );
         }
+        @Test
+        @DisplayName("Quando criamos um novo sabor com dados válidos")
+        void quandoCriarSaborCodigoAcessoInvalido() throws Exception {
+            // Arrange
+            // nenhuma necessidade além do setup()
 
+            // Act
+            String responseJsonString = driver.perform(post(URI_SABORES)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoId", estabelecimento.getId().toString())
+                            .param("estabelecimentoCodigoAcesso", "457894")
+                            .content(objectMapper.writeValueAsString(saborPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest()) // Codigo 400
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals(resultado.getMessage(), "Codigo de acesso invalido!");
+        }
         @Test
         @DisplayName("Quando alteramos o sabor com dados válidos")
         void quandoAlteramosSaborValido() throws Exception {
@@ -256,7 +296,7 @@ public class SaborControllerTests {
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
                             .content(objectMapper.writeValueAsString(saborPostPutRequestDTO)))
-                    .andExpect(status().isBadRequest()) // Codigo 400
+                    .andExpect(status().isNotFound()) // Codigo 404
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
@@ -325,7 +365,7 @@ public class SaborControllerTests {
                             .param("saborId", "999999")
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso()))
-                    .andExpect(status().isBadRequest()) // Codigo 400
+                    .andExpect(status().isNotFound()) // Codigo 404
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
@@ -495,6 +535,35 @@ public class SaborControllerTests {
             );
         }
     }
+    @Test
+    @DisplayName("Quando alteramos um sabor com tipo válido")
+    void quandoAlteramosSaborNaoExisteEmEstabelecimento() throws Exception {
+        // Arrange
+        saborPostPutRequestDTO.setTipo("salgado");
+        Sabor sabor1 = Sabor.builder()
+                .nome("Nutella")
+                .tipo("doce")
+                .precoM(50.00)
+                .precoG(60.00)
+                .disponivel(true)
+                .build();
+        saborRepository.save(sabor1);
+        // Act
+        String responseJsonString = driver.perform(put(URI_SABORES)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("saborId", sabor1.getId().toString())
+                        .param("estabelecimentoId", estabelecimento.getId().toString())
+                        .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
+                        .content(objectMapper.writeValueAsString(saborPostPutRequestDTO)))
+                .andExpect(status().isNotFound()) // Codigo 404
+                .andDo(print())
+                .andReturn().getResponse().getContentAsString();
+
+        CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+        // Assert
+        assertEquals(resultado.getMessage(), "Sabor não existe para esse estabelecimento!");
+    }
 
     @Nested
     @DisplayName("Conjunto de casos de verificação de preco")
@@ -619,15 +688,15 @@ public class SaborControllerTests {
         @DisplayName("Quando alteramos um sabor com disponibilidade válida")
         void quandoAlteramosSaborDisponibilidadeValida() throws Exception {
             // Arrange
-            saborPostPutRequestDTO.setDisponivel(false);
+            saborPatchRequestDTO.setDisponivel(false);
 
             // Act
-            String responseJsonString = driver.perform(put(URI_SABORES)
+            String responseJsonString = driver.perform(patch(URI_SABORES + "/disponibilidade")
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("saborId", sabor.getId().toString())
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
-                            .content(objectMapper.writeValueAsString(saborPostPutRequestDTO)))
+                            .content(objectMapper.writeValueAsString(saborPatchRequestDTO)))
                     .andExpect(status().isOk()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -638,44 +707,19 @@ public class SaborControllerTests {
             assertFalse(resultado.isDisponivel());
         }
 
-        @Test
-        @DisplayName("Quando alteramos um sabor com disponibilidade nula")
-        void quandoAlteramosSaborDisponibilidadeNula() throws Exception {
-            // Arrange
-            saborPostPutRequestDTO.setDisponivel(null);
-
-            // Act
-            String responseJsonString = driver.perform(put(URI_SABORES)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("saborId", sabor.getId().toString())
-                            .param("estabelecimentoId", estabelecimento.getId().toString())
-                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
-                            .content(objectMapper.writeValueAsString(saborPostPutRequestDTO)))
-                    .andExpect(status().isBadRequest()) // Codigo 200
-                    .andDo(print())
-                    .andReturn().getResponse().getContentAsString();
-
-            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
-
-            // Assert
-            assertAll(
-                    () -> assertEquals("Erros de validacao encontrados", resultado.getMessage()),
-                    () -> assertEquals("Disponibilidade obrigatoria", resultado.getErrors().get(0))
-            );
-        }
 
         @Test
         @DisplayName("Quando alteramos a disponibilidade de um sabor para false")
         void quandoAlteramosDisponibilidadeSaborFalse() throws Exception {
             // Arrange
+            saborPatchRequestDTO.setDisponivel(false);
             // Act
-            String responseJsonString = driver.perform(put(URI_SABORES + "/" + sabor.getId() + "/" + false)
+            String responseJsonString = driver.perform(patch(URI_SABORES + "/disponibilidade")
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("saborId", sabor.getId().toString())
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
-                            .param("disponibilidade", String.valueOf(false))
-                            .content(objectMapper.writeValueAsString(sabor)))
+                            .content(objectMapper.writeValueAsString(saborPatchRequestDTO)))
                     .andExpect(status().isOk()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -692,14 +736,14 @@ public class SaborControllerTests {
             // Arrange
             sabor.setDisponivel(false);
             saborRepository.save(sabor);
+            saborPatchRequestDTO.setDisponivel(true);
             // Act
-            String responseJsonString = driver.perform(put(URI_SABORES + "/" + sabor.getId() + "/" + true)
+            String responseJsonString = driver.perform(patch(URI_SABORES + "/disponibilidade")
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("saborId", sabor.getId().toString())
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
-                            .param("disponibilidade", String.valueOf(true))
-                            .content(objectMapper.writeValueAsString(sabor)))
+                            .content(objectMapper.writeValueAsString(saborPatchRequestDTO)))
                     .andExpect(status().isOk()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -716,14 +760,14 @@ public class SaborControllerTests {
             // Arrange
             sabor.setDisponivel(false);
             saborRepository.save(sabor);
+            saborPatchRequestDTO.setDisponivel(false);
             // Act
-            String responseJsonString = driver.perform(put(URI_SABORES + "/" + sabor.getId() + "/" + false)
+            String responseJsonString = driver.perform(patch(URI_SABORES + "/disponibilidade")
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("saborId", sabor.getId().toString())
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
-                            .param("disponibilidade", String.valueOf(false))
-                            .content(objectMapper.writeValueAsString(sabor)))
+                            .content(objectMapper.writeValueAsString(saborPatchRequestDTO)))
                     .andExpect(status().isBadRequest()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -738,14 +782,14 @@ public class SaborControllerTests {
         @DisplayName("Quando alteramos a disponibilidade de um sabor para true quando já está true")
         void quandoAlteramosDisponibilidadeSaborTrueQuandoJaEstaTrue() throws Exception {
             // Arrange
+            saborPatchRequestDTO.setDisponivel(true);
             // Act
-            String responseJsonString = driver.perform(put(URI_SABORES + "/" + sabor.getId() + "/" + true)
+            String responseJsonString = driver.perform(patch(URI_SABORES + "/disponibilidade")
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("saborId", sabor.getId().toString())
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
-                            .param("disponibilidade", String.valueOf(true))
-                            .content(objectMapper.writeValueAsString(sabor)))
+                            .content(objectMapper.writeValueAsString(saborPatchRequestDTO)))
                     .andExpect(status().isBadRequest()) // Codigo 200
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -761,14 +805,13 @@ public class SaborControllerTests {
         void quandoAlteramosDisponibilidadeSaborCodigoErrado() throws Exception {
             // Arrange
             // Act
-            String responseJsonString = driver.perform(put(URI_SABORES + "/" + sabor.getId() + "/" + false)
+            String responseJsonString = driver.perform(patch(URI_SABORES + "/disponibilidade")
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("saborId", sabor.getId().toString())
                             .param("estabelecimentoId", estabelecimento.getId().toString())
                             .param("estabelecimentoCodigoAcesso", "aaaaaa")
-                            .param("disponibilidade", String.valueOf(false))
-                            .content(objectMapper.writeValueAsString(sabor)))
-                    .andExpect(status().isBadRequest()) // Codigo 200
+                            .content(objectMapper.writeValueAsString(saborPatchRequestDTO)))
+                    .andExpect(status().isBadRequest()) // Codigo 400
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 

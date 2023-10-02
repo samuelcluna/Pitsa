@@ -1,30 +1,53 @@
 package com.ufcg.psoft.commerce.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "pizzas")
 public class Pizza {
 
-    private double valor;
+    @Id
+    @JsonProperty("id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private Long id;
 
-    public Pizza(List<Sabor> sabores, String tamanho) {
-        if (sabores.size() > 2 && tamanho.equals("grande")) throw new RuntimeException("Estouro para o máximo 2 sabores de pizza grande.");
-        valor = this.calcularValor(sabores, tamanho);
-    }
+    @OneToOne
+    @JoinColumn(nullable = false)
+    @JsonProperty("sabor1")
+    private Sabor sabor1;
 
-    private double calcularValor(List<Sabor> sabores, String tamanho) {
-        double total = 0;
-        if (tamanho.equals("grande")) {
-            for (Sabor sabor: sabores) {
-                total += sabor.getPrecoG();
-            }
-            return total / sabores.size();
-        }
-        return sabores.get(0).getPrecoM();
-    }
+    @JsonProperty("sabor2")
+    private Sabor sabor2;
+
+    @JsonProperty("tamanho")
+    @Column(nullable = false)
+    private String tamanho;
+
+    @JsonProperty("preco")
+    private double preco;
+
+//    @PrePersist
+//    @PreUpdate
+//    private void calcularValor() {
+//        double total = 0;
+//        if (tamanho.equals("grande")) {
+//            for (Sabor sabor: sabores) {
+//                total += sabor.getPrecoG();
+//            }
+//            this.preco = total / sabores.size();
+//        }
+//        this.preco = sabores.get(0).getPrecoM();
+//    }
 
 }

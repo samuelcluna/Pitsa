@@ -26,4 +26,7 @@ public class ClientePostPutRequestDTO {
     @NotNull(message = "Codigo de acesso obrigatorio")
     @Pattern(regexp = "^\\d{6}$", message = "Codigo de acesso deve ter exatamente 6 digitos numericos")
     private String codigoAcesso;
+
+    @JsonProperty("email")
+    private String email;
 }

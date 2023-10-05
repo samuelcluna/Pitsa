@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
 @Data
 @Builder
@@ -16,38 +14,20 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "pizzas")
 public class Pizza {
-
-    @Id
     @JsonProperty("id")
+    @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(nullable = false)
+    @JsonProperty("tamanho")
+    private String tamanho;
+
     @JsonProperty("sabor1")
+    @OneToOne
     private Sabor sabor1;
 
     @JsonProperty("sabor2")
+    @OneToOne
     private Sabor sabor2;
-
-    @JsonProperty("tamanho")
-    @Column(nullable = false)
-    private String tamanho;
-
-    @JsonProperty("preco")
-    private double preco;
-
-//    @PrePersist
-//    @PreUpdate
-//    private void calcularValor() {
-//        double total = 0;
-//        if (tamanho.equals("grande")) {
-//            for (Sabor sabor: sabores) {
-//                total += sabor.getPrecoG();
-//            }
-//            this.preco = total / sabores.size();
-//        }
-//        this.preco = sabores.get(0).getPrecoM();
-//    }
 
 }

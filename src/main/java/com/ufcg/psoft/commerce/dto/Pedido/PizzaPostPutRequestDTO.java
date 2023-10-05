@@ -1,9 +1,7 @@
 package com.ufcg.psoft.commerce.dto.Pedido;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ufcg.psoft.commerce.model.Sabor;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,10 +20,10 @@ public class PizzaPostPutRequestDTO {
     private String tamanho;
 
     @JsonProperty("sabor1")
-    @NotNull(message = "Deve existir ao menos 1 sabor.")
-    Sabor sabor1;
+    @NotBlank(message = "Sabor1 obrigatorio")
+    private String sabor1;
 
     @JsonProperty("sabor2")
-    Sabor sabor2;
+    private String sabor2;
 
 }

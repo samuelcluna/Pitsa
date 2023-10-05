@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.dto.Pedido;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ufcg.psoft.commerce.model.Pizza;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,12 +17,12 @@ import java.util.List;
 @AllArgsConstructor
 public class PedidoPostPutRequestDTO {
 
-    @JsonProperty("pizzas")
-    @NotEmpty(message = "Pelo menos 1 pizza!")
-    List<Pizza> pizzas;
-
     @JsonProperty("endereco")
-    String enderecoEntrega;
+    private String enderecoEntrega;
 
+    @JsonProperty
+    @ManyToOne()
+    @NotEmpty(message = "Pizzas obrigatorias")
+    private List<Pizza> pizzas;
 
 }

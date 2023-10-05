@@ -4,7 +4,6 @@ import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
 import com.ufcg.psoft.commerce.model.Pedido;
 
 @FunctionalInterface
-public interface PedidoCriarService {
-    Pedido save(PedidoPostPutRequestDTO pedidoDTO, Long estabelecimentoId, Long clienteId, String clienteCodigoAcesso);
-
+public interface PedidoAlterarService {
+    Pedido update(Long pedidoId, String codigoAcesso, PedidoPostPutRequestDTO pedidoDTO);
 }

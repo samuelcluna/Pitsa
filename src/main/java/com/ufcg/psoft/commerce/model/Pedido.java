@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,23 +18,30 @@ import java.util.List;
 @Table(name = "pedido")
 public class Pedido {
 
+    @JsonProperty("id")
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+    private Long id;
 
-    @JsonProperty("pizzas")
-    List<Pizza> pizzas;
+    @JsonProperty
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "pizzas")
+    private List<Pizza> pizzas = new ArrayList<>();
 
     @JsonProperty("endereco")
-    String enderecoEntrega;
+    private String enderecoEntrega;
 
     @JsonProperty("estabelecimento")
-    Long estabelecimentoId;
+    private Long estabelecimentoId;
 
     @JsonProperty("cliente")
-    Long clienteId;
+    private Long clienteId;
 
     @JsonProperty("preco")
-    double preco;
+    private Double preco;
+
+    @JsonProperty("entregador")
+    private Long entregadorId;
 
 }

@@ -19,14 +19,14 @@ public class ClienteV1DemonstrarInteresseService implements  ClienteDemonstrarIn
 
     @Override
     public SaborResponseDTO update(String codigoAcesso, Long id, Long saborId){
-        Cliente clienteExistente = clienteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(""));
+        Cliente clienteExistente = clienteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
 
         if(!clienteExistente.getCodigoAcesso().equals(codigoAcesso))
-            throw new InvalidAccessException("Codigo de acesso invalido");
+            throw new InvalidAccessException("Codigo de acesso invalido!");
 
         SaborResponseDTO sabor = saborDemonstrarInteresseService.find(saborId);
         if(sabor.isDisponivel())
-            throw new InvalidAccessException("O sabor ja esta disponivel");
+            throw new InvalidAccessException("O sabor consultado ja esta disponivel!");
 
         sabor.getClientesInteressados().add(id);
         return saborDemonstrarInteresseService.update(id, sabor);

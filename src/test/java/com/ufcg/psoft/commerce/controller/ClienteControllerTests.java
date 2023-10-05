@@ -652,7 +652,7 @@ public class ClienteControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("codigoAcesso", cliente.getCodigoAcesso())
                             .param("saborId", "999999"))
-                    .andExpect(status().isBadRequest()) // Codigo 400
+                    .andExpect(status().isNotFound()) // Codigo 404
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
@@ -675,7 +675,7 @@ public class ClienteControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("codigoAcesso", cliente.getCodigoAcesso())
                             .param("saborId", sabor.getId().toString()))
-                    .andExpect(status().isBadRequest()) // Codigo 400
+                    .andExpect(status().isNotFound()) // Codigo 404
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 

@@ -19,12 +19,12 @@ public class SaborV1DemonstrarInteresseService implements SaborDemonstrarInteres
     @Override
     public SaborResponseDTO find(Long id){
         return modelMapper.map(saborRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("")), SaborResponseDTO.class);
+                .orElseThrow(() -> new ResourceNotFoundException("O sabor consultado nao existe!")), SaborResponseDTO.class);
     }
 
     @Override
     public SaborResponseDTO update(Long id, SaborResponseDTO saborDTO){
-        Sabor sabor = saborRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Sabor nao encontrado!"));
+        Sabor sabor = saborRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("O sabor consultado nao existe!"));
         modelMapper.map(saborDTO, sabor);
         return modelMapper.map(saborRepository.save(sabor), SaborResponseDTO.class);
     }

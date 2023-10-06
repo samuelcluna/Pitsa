@@ -788,22 +788,22 @@ public class PedidoControllerTests {
 //
 //    }
 //
-    @Nested
-    @DisplayName("Alteração de estado de pedido")
-    public class AlteracaoEstadoPedidoTest {
-        Pedido pedido1;
-
-        @BeforeEach
-        void setUp() {
-            pedido1 = pedidoRepository.save(Pedido.builder()
-                    .estabelecimentoId(estabelecimento.getId())
-                    .clienteId(cliente.getId())
-                    .enderecoEntrega("Rua 1")
-                    .pizzas(List.of(pizzaG))
-                    .preco(10.0)
-                    .build()
-            );
-        }
+//    @Nested
+//    @DisplayName("Alteração de estado de pedido")
+//    public class AlteracaoEstadoPedidoTest {
+//        Pedido pedido1;
+//
+//        @BeforeEach
+//        void setUp() {
+//            pedido1 = pedidoRepository.save(Pedido.builder()
+//                    .estabelecimentoId(estabelecimento.getId())
+//                    .clienteId(cliente.getId())
+//                    .enderecoEntrega("Rua 1")
+//                    .pizzas(List.of(pizzaG))
+//                    .preco(10.0)
+//                    .build()
+//            );
+//        }
 
 //        @Test
 //        @DisplayName("Quando o estabelecimento associa um pedido a um entregador")
@@ -866,12 +866,19 @@ public class PedidoControllerTests {
 
             @BeforeEach
             void setUp() {
+                cliente = clienteRepository.save(Cliente.builder()
+                        .nome("Anton Ego")
+                        .endereco("Paris")
+                        .codigoAcesso("123456")
+                        .build());
+
                 pedido1 = pedidoRepository.save(Pedido.builder()
                         .estabelecimentoId(estabelecimento.getId())
                         .clienteId(cliente.getId())
                         .enderecoEntrega("Rua 1")
                         .pizzas(List.of(pizzaG))
                         .preco(10.0)
+                        .statusPagamento(false)
                         .build()
                 );
             }
@@ -898,7 +905,7 @@ public class PedidoControllerTests {
             }
 
             @Test
-            @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
+            @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de débito")
             void confirmaPagamentoCartaoDebito() throws Exception {
                 // Arrange
                 // Act
@@ -919,7 +926,7 @@ public class PedidoControllerTests {
             }
 
             @Test
-            @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
+            @DisplayName("Quando confirmamos o pagamento de um pedido por Pix")
             void confirmaPagamentoPIX() throws Exception {
                 // Arrange
                 // Act

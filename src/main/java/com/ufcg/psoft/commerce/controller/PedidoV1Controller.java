@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.controller;
 
+import com.electronwill.nightconfig.core.conversion.Path;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
 import com.ufcg.psoft.commerce.service.Pedido.ClienteObterPedidoService;
 import com.ufcg.psoft.commerce.service.Pedido.PedidoAlterarService;
@@ -8,6 +9,7 @@ import com.ufcg.psoft.commerce.service.Pedido.ClienteDeletarPedidoService;
 import com.ufcg.psoft.commerce.service.Pedido.EstabelecimentoObterPedidoService;
 import com.ufcg.psoft.commerce.service.Pedido.EstabelecimentoDeletarPedidoService;
 import jakarta.validation.Valid;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -128,5 +130,16 @@ public class PedidoV1Controller {
                 .status(HttpStatus.NO_CONTENT)
                 .body("");
     }
-
+    @PutMapping("/{clienteId}/confirmar-pagamento")
+    public ResponseEntity<?> confirmarPagamento(
+            @PathVariable Long clienteId,
+            @RequestParam String codigoAcessoCliente,
+            @RequestParam Long pedidoId,
+            @RequestParam String metodoPagamento,
+            @RequestBody @Valid PedidoPostPutRequestDTO pedidoPostPutRequestDTO
+            ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(pedidoAlterarService.update(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento, pedidoPostPutRequestDTO));
+    }
 }

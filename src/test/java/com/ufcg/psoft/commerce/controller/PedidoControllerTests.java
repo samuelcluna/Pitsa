@@ -710,7 +710,7 @@ public class PedidoControllerTests {
 //            assertEquals(pedido.getEstabelecimentoId(), resultado.get(0).getEstabelecimentoId());
 //        }
 
-//        @Test
+        //        @Test
 //        @DisplayName("Quando um cliente busca todos os pedidos feitos naquele estabelcimento com status")
 //        void quandoClienteBuscaTodosPedidosFeitosNaqueleEstabelecimentoComStatus() throws Exception {
 //            // Arrange
@@ -788,23 +788,23 @@ public class PedidoControllerTests {
 //
 //    }
 //
-//    @Nested
-//    @DisplayName("Alteração de estado de pedido")
-//    public class AlteracaoEstadoPedidoTest {
-//        Pedido pedido1;
-//
-//        @BeforeEach
-//        void setUp() {
-//            pedido1 = pedidoRepository.save(Pedido.builder()
-//                    .estabelecimentoId(estabelecimento.getId())
-//                    .clienteId(cliente.getId())
-//                    .enderecoEntrega("Rua 1")
-//                    .pizzas(List.of(pizzaG))
-//                    .preco(10.0)
-//                    .build()
-//            );
-//        }
-//
+    @Nested
+    @DisplayName("Alteração de estado de pedido")
+    public class AlteracaoEstadoPedidoTest {
+        Pedido pedido1;
+
+        @BeforeEach
+        void setUp() {
+            pedido1 = pedidoRepository.save(Pedido.builder()
+                    .estabelecimentoId(estabelecimento.getId())
+                    .clienteId(cliente.getId())
+                    .enderecoEntrega("Rua 1")
+                    .pizzas(List.of(pizzaG))
+                    .preco(10.0)
+                    .build()
+            );
+        }
+
 //        @Test
 //        @DisplayName("Quando o estabelecimento associa um pedido a um entregador")
 //        void quandoEstabelecimentoAssociaPedidoEntregador() throws Exception {
@@ -857,86 +857,87 @@ public class PedidoControllerTests {
 //            assertEquals(resultado.getStatusEntrega(), "Pedido entregue");
 //        }
 //    }
-//
-    @Nested
-    @DisplayName("Conjunto de casos de teste da confirmação de pagamento de um pedido")
-    public class PedidoConfirmarPagamentoTests {
 
-        Pedido pedido1;
+        @Nested
+        @DisplayName("Conjunto de casos de teste da confirmação de pagamento de um pedido")
+        public class PedidoConfirmarPagamentoTests {
 
-        @BeforeEach
-        void setUp() {
-            pedido1 = pedidoRepository.save(Pedido.builder()
-                    .estabelecimentoId(estabelecimento.getId())
-                    .clienteId(cliente.getId())
-                    .enderecoEntrega("Rua 1")
-                    .pizzas(List.of(pizzaG))
-                    .preco(10.0)
-                    .build()
-            );
-        }
+            Pedido pedido1;
 
-        @Test
-        @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
-        void confirmaPagamentoCartaoCredito() throws Exception {
-            // Arrange
-            // Act
-            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigoAcessoCliente", cliente.getCodigoAcesso())
-                            .param("pedidoId", pedido1.getId().toString())
-                            .param("metodoPagamento", "Cartão de crédito")
-                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                    .andExpect(status().isOk()) // Codigo 200
-                    .andReturn().getResponse().getContentAsString();
-            // Assert
-            Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
-            assertAll(
-                    () -> assertTrue(resultado.getStatusPagamento()),
-                    () -> assertEquals(10, resultado.getPreco())
-            );
-        }
+            @BeforeEach
+            void setUp() {
+                pedido1 = pedidoRepository.save(Pedido.builder()
+                        .estabelecimentoId(estabelecimento.getId())
+                        .clienteId(cliente.getId())
+                        .enderecoEntrega("Rua 1")
+                        .pizzas(List.of(pizzaG))
+                        .preco(10.0)
+                        .build()
+                );
+            }
 
-        @Test
-        @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
-        void confirmaPagamentoCartaoDebito() throws Exception {
-            // Arrange
-            // Act
-            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigoAcessoCliente", cliente.getCodigoAcesso())
-                            .param("pedidoId", pedido1.getId().toString())
-                            .param("metodoPagamento", "Cartão de débito")
-                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                    .andExpect(status().isOk()) // Codigo 200
-                    .andReturn().getResponse().getContentAsString();
-            // Assert
-            Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
-            assertAll(
-                    () -> assertTrue(resultado.getStatusPagamento()),
-                    () -> assertEquals(9.75, resultado.getPreco())
-            );
-        }
+            @Test
+            @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
+            void confirmaPagamentoCartaoCredito() throws Exception {
+                // Arrange
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("codigoAcessoCliente", cliente.getCodigoAcesso())
+                                .param("pedidoId", pedido1.getId().toString())
+                                .param("metodoPagamento", "Cartão de crédito")
+                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                        .andExpect(status().isOk()) // Codigo 200
+                        .andReturn().getResponse().getContentAsString();
+                // Assert
+                Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
+                assertAll(
+                        () -> assertTrue(resultado.getStatusPagamento()),
+                        () -> assertEquals(10, resultado.getPreco())
+                );
+            }
 
-        @Test
-        @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
-        void confirmaPagamentoPIX() throws Exception {
-            // Arrange
-            // Act
-            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigoAcessoCliente", cliente.getCodigoAcesso())
-                            .param("pedidoId", pedido1.getId().toString())
-                            .param("metodoPagamento", "PIX")
-                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                    .andExpect(status().isOk()) // Codigo 200
-                    .andReturn().getResponse().getContentAsString();
-            // Assert
-            Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
-            assertAll(
-                    () -> assertTrue(resultado.getStatusPagamento()),
-                    () -> assertEquals(9.5, resultado.getPreco())
-            );
+            @Test
+            @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
+            void confirmaPagamentoCartaoDebito() throws Exception {
+                // Arrange
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("codigoAcessoCliente", cliente.getCodigoAcesso())
+                                .param("pedidoId", pedido1.getId().toString())
+                                .param("metodoPagamento", "Cartão de débito")
+                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                        .andExpect(status().isOk()) // Codigo 200
+                        .andReturn().getResponse().getContentAsString();
+                // Assert
+                Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
+                assertAll(
+                        () -> assertTrue(resultado.getStatusPagamento()),
+                        () -> assertEquals(9.75, resultado.getPreco())
+                );
+            }
+
+            @Test
+            @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
+            void confirmaPagamentoPIX() throws Exception {
+                // Arrange
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("codigoAcessoCliente", cliente.getCodigoAcesso())
+                                .param("pedidoId", pedido1.getId().toString())
+                                .param("metodoPagamento", "PIX")
+                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                        .andExpect(status().isOk()) // Codigo 200
+                        .andReturn().getResponse().getContentAsString();
+                // Assert
+                Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
+                assertAll(
+                        () -> assertTrue(resultado.getStatusPagamento()),
+                        () -> assertEquals(9.5, resultado.getPreco())
+                );
+            }
         }
     }
 }

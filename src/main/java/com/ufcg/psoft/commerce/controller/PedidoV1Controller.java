@@ -135,11 +135,10 @@ public class PedidoV1Controller {
             @PathVariable Long clienteId,
             @RequestParam String codigoAcessoCliente,
             @RequestParam Long pedidoId,
-            @RequestParam String metodoPagamento,
-            @RequestBody @Valid PedidoPostPutRequestDTO pedidoPostPutRequestDTO
-            ) {
+            @RequestParam String metodoPagamento
+    ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(pedidoAlterarService.update(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento, pedidoPostPutRequestDTO));
+                .body(pedidoAlterarService.update(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento));
     }
 }

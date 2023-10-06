@@ -1,13 +1,13 @@
 package com.ufcg.psoft.commerce.service.Pedido;
 
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
-import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Pedido;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.PedidoRepository;
+import com.ufcg.psoft.commerce.service.Pedido.Pagamento.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,9 +21,6 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     ClienteRepository clienteRepository;
     @Autowired
     ModelMapper modelMapper;
-
-    @Autowired
-    PagamentoStrategy pagamentoStrategy;
 
     @Override
     public Pedido update(Long pedidoId, String codigoAcesso, PedidoPostPutRequestDTO pedidoDTO) {
@@ -42,7 +39,8 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     }
 
     @Override
-    public PedidoResponseDTO update(Long pedidoId, String codigoAcessoCliente, Long clienteId, String metodoPagamento, PedidoPostPutRequestDTO pedidoPostPutRequestDTO) {
+    public Pedido update(Long pedidoId, String codigoAcessoCliente, Long clienteId, String metodoPagamento) {
+
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
         Cliente clienteExistente = clienteRepository.findById(clienteId)
@@ -52,16 +50,21 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
             throw new InvalidAccessException("Codigo de acesso invalido!");
         }
 
-
         if (pedidoExistente.getStatusPagamento()) {
             throw new RuntimeException("O pedido já foi pago!");
         }
+        PagamentoStrategy tiposPagamentos;
+        if(metodoPagamento.equals("Cartão de crédito")){
+            tiposPagamentos = new PagamentoCredito();
 
-        metodoPagamento = metodoPagamento.replaceAll("(?i).*\\b(débito|crédito|PIX)\\b.*", "$1").toLowerCase();
+        } else if (metodoPagamento.equals("PIX")) {
+            tiposPagamentos = new PagamentoPix();
 
-        pagamentoStrategy.processarPagamento(metodoPagamento,Pedido pedidoExistente);
-
-        pedidoExistente.setStatusPagamento(true);
-        return modelMapper.map(pedidoRepository.save(pedidoExistente), PedidoResponseDTO.class);
+        }else {
+            tiposPagamentos = new PagamentoDebito();
+        }
+        tiposPagamentos.pagar(pedidoExistente);
+        pedidoRepository.flush();
+        return pedidoExistente;
     }
 }

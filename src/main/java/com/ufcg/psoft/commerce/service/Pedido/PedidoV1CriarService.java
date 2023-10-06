@@ -75,6 +75,7 @@ public class PedidoV1CriarService implements PedidoCriarService {
         pedidoExistente.setPizzas(pedidoDTO.getPizzas());
         pedidoExistente.setClienteId(clienteId);
         pedidoExistente.setEstabelecimentoId(estabelecimentoId);
+        pedidoExistente.setStatusPagamento(false);
         return pedidoRepository.save(pedidoExistente);
     }
 }

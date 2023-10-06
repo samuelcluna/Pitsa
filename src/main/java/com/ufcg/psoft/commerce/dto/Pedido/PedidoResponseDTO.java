@@ -41,4 +41,5 @@ public class PedidoResponseDTO {
 
     @JsonProperty("status_pagamento")
     private boolean statusPagamento;
+
 }

@@ -53,7 +53,6 @@ public class PedidoV1ObterService implements PedidoObterService {
                 .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
 
         if (!clienteExistente.getCodigoAcesso().equals(clienteCodigoAcesso)) throw new InvalidAccessException("Código de acesso inválido!");
-
         if (!pedidoExistente.getClienteId().equals(clienteExistente.getId())) throw new ResourceNotFoundException("O pedido para esse cliente não foi encontrado!");
 
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
@@ -62,7 +61,7 @@ public class PedidoV1ObterService implements PedidoObterService {
     @Override
     public List<PedidoResponseDTO> estabelecimentoObterPedidos(Long estabelecimentoId, String estabelecimentoCodigoAcesso) {
         Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(estabelecimentoId)
-                .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
+                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
 
         if (!estabelecimentoExistente.getCodigoAcesso().equals(estabelecimentoCodigoAcesso)) throw new InvalidAccessException("Código de acesso inválido!");
 

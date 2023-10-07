@@ -21,11 +21,9 @@ public class PedidoV1Controller {
     @Autowired
     PedidoObterService obterService;
     @Autowired
-    PedidoAlterarService pedidoAlterarService;
+    PedidoAlterarService alterarService;
     @Autowired
-    ClienteDeletarPedidoService clienteDeletarPedidoService;
-    @Autowired
-    EstabelecimentoDeletarPedidoService estabelecimentoDeletarPedidoService;
+    PedidoDeletarService deletarService;
 
     @PostMapping
     public ResponseEntity<?> criarPedido(
@@ -65,26 +63,28 @@ public class PedidoV1Controller {
             @RequestBody @Valid PedidoPostPutRequestDTO pedidoDTO) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(pedidoAlterarService.update(pedidoId, codigoAcesso, pedidoDTO));
+                .body(alterarService.update(pedidoId, codigoAcesso, pedidoDTO));
     }
 
-    @DeleteMapping
+    @DeleteMapping("clientes/{clienteId}")
     public ResponseEntity<?> clienteDeletarTodosPedidos(
-            @RequestParam Long clienteId) {
-        clienteDeletarPedidoService.clienteDelete(null, clienteId);
+            @PathVariable Long clienteId,
+            @RequestParam String clienteCodigoAcesso) {
+        deletarService.clienteDeletarTodosPedidos(clienteId, clienteCodigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
-                .body("");
+                .build();
     }
 
-    @DeleteMapping("{pedidoId}/{clienteId}")
+    @DeleteMapping("clientes/{clienteId}/{pedidoId}")
     public ResponseEntity<?> clienteDeletarPedido(
+            @PathVariable Long clienteId,
             @PathVariable Long pedidoId,
-            @PathVariable Long clienteId) {
-        clienteDeletarPedidoService.clienteDelete(pedidoId, clienteId);
+            @RequestParam String clienteCodigoAcesso) {
+        deletarService.clienteDeletarPedido(pedidoId, clienteId, clienteCodigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
-                .body("");
+                .build();
     }
 
     @GetMapping("estabelecimentos/{estabelecimentoId}")
@@ -106,20 +106,22 @@ public class PedidoV1Controller {
                 .body(obterService.estabelecimentoObterPedido(pedidoId, estabelecimentoId, estabelecimentoCodigoAcesso));
     }
 
-    @DeleteMapping("{pedidoId}/{estabelecimentoId}/{estabelecimentoCodigoAcesso}")
+    @DeleteMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}")
     public ResponseEntity<?> estabelecimentoDeletarPedido(
             @PathVariable Long estabelecimentoId,
-            @PathVariable Long pedidoId) {
-        estabelecimentoDeletarPedidoService.estabelecimentoDelete(pedidoId, estabelecimentoId);
+            @PathVariable Long pedidoId,
+            @RequestParam String estabelecimentoCodigoAcesso) {
+        deletarService.estabelecimentoDeletarPedido(pedidoId, estabelecimentoId, estabelecimentoCodigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
-                .body("");
+                .build();
     }
 
-    @DeleteMapping("{estabelecimentoId}")
+    @DeleteMapping("estabelecimentos/{estabelecimentoId}")
     public ResponseEntity<?> estabelecimentoDeletarTodosPedidos(
-            @PathVariable Long estabelecimentoId) {
-        estabelecimentoDeletarPedidoService.estabelecimentoDelete(null, estabelecimentoId);
+            @PathVariable Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso) {
+        deletarService.estabelecimentoDeletarTodosPedidos(estabelecimentoId, estabelecimentoCodigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body("");
@@ -133,6 +135,6 @@ public class PedidoV1Controller {
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(pedidoAlterarService.update(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento));
+                .body(alterarService.update(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento));
     }
 }

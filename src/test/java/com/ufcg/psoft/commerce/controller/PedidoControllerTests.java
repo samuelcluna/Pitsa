@@ -436,15 +436,15 @@ public class PedidoControllerTests {
         }
 
         @Test
-        @DisplayName("Quando um cliente excluí um pedido feito por ele salvo")
+        @DisplayName("Quando um cliente exclui um pedido feito por ele salvo")
         void quandoClienteExcluiPedidoSalvo() throws Exception {
             // Arrange
             pedidoRepository.save(pedido);
 
             // Act
-            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/" + cliente.getId())
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigoAcesso", cliente.getCodigoAcesso()))
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
                     .andExpect(status().isNoContent())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -454,15 +454,15 @@ public class PedidoControllerTests {
         }
 
         @Test
-        @DisplayName("Quando um cliente excluí um pedido inexistente")
+        @DisplayName("Quando um cliente exclui um pedido inexistente")
         void quandoClienteExcluiPedidoInexistente() throws Exception {
             // Arrange
             // nenhuma necessidade além do setup()
 
             // Act
-            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + "999999" + "/" + cliente.getId())
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/999999")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigoAcesso", cliente.getCodigoAcesso()))
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
                     .andExpect(status().isNotFound())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -474,7 +474,7 @@ public class PedidoControllerTests {
         }
 
         @Test
-        @DisplayName("Quando um cliente excluí todos seus pedidos feitos por ele salvos")
+        @DisplayName("Quando um cliente exclui todos seus pedidos feitos por ele salvos")
         void quandoClienteExcluiTodosPedidosSalvos() throws Exception {
             // Arrange
             pedidoRepository.save(pedido);
@@ -487,8 +487,8 @@ public class PedidoControllerTests {
                     .build());
 
             // Act
-            String responseJsonString = driver.perform(delete(URI_PEDIDOS)
-                            .param("clienteId", cliente.getId().toString())
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/clientes/" + cliente.getId())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNoContent())
                     .andDo(print())
@@ -499,15 +499,15 @@ public class PedidoControllerTests {
         }
 
         @Test
-        @DisplayName("Quando um estabelencimento excluí um pedido feito nele salvo")
+        @DisplayName("Quando um estabelecimento exclui um pedido feito nele salvo")
         void quandoEstabelecimentoExcluiPedidoSalvo() throws Exception {
             // Arrange
             pedidoRepository.save(pedido);
 
             // Act
-            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/" + estabelecimento.getId() + "/" + estabelecimento.getCodigoAcesso())
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId() + "/" + pedido.getId())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigoAcesso", estabelecimento.getCodigoAcesso()))
+                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso()))
                     .andExpect(status().isNoContent())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -517,15 +517,15 @@ public class PedidoControllerTests {
         }
 
         @Test
-        @DisplayName("Quando um estabelencimento excluí um pedido inexistente")
+        @DisplayName("Quando um estabelecimento exclui um pedido inexistente")
         void quandoEstabelecimentoExcluiPedidoInexistente() throws Exception {
             // Arrange
             // nenhuma necessidade além do setup()
 
             // Act
-            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + "999999" + "/" + estabelecimento.getId())
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId() +  "/999999")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigoAcesso", estabelecimento.getCodigoAcesso()))
+                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso()))
                     .andExpect(status().isNotFound())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -537,7 +537,7 @@ public class PedidoControllerTests {
         }
 
         @Test
-        @DisplayName("Quando um estabelencimento excluí um pedido feito em outro estabelecimento")
+        @DisplayName("Quando um estabelecimento exclui um pedido feito em outro estabelecimento")
         void quandoEstabelecimentoExcluiPedidoDeOutroEstabelecimento() throws Exception {
             // Arrange
             pedidoRepository.save(pedido);
@@ -546,9 +546,9 @@ public class PedidoControllerTests {
                     .build());
 
             // Act
-            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/" + estabelecimento1.getId() + "/" + estabelecimento1.getCodigoAcesso())
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido.getId())
                             .contentType(MediaType.APPLICATION_JSON)
-                            .param("codigoAcesso", estabelecimento1.getCodigoAcesso()))
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso()))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
@@ -556,7 +556,7 @@ public class PedidoControllerTests {
             CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
 
             // Assert
-            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+            assertEquals("Código de acesso inválido!", resultado.getMessage());
         }
 
         @Test
@@ -573,8 +573,10 @@ public class PedidoControllerTests {
                     .build());
 
             // Act
-            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + estabelecimento.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
+                    )
                     .andExpect(status().isNoContent())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();

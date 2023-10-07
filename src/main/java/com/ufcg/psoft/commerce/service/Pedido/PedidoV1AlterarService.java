@@ -48,7 +48,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     }
 
     @Override
-    public PedidoResponseDTO update(Long pedidoId, String codigoAcessoCliente, Long clienteId, String metodoPagamento) {
+    public PedidoResponseDTO confirmarPagamento(Long pedidoId, String codigoAcessoCliente, Long clienteId, String metodoPagamento) {
 
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));

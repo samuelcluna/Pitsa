@@ -124,9 +124,9 @@ public class PedidoV1Controller {
         deletarService.estabelecimentoDeletarTodosPedidos(estabelecimentoId, estabelecimentoCodigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
-                .body("");
+                .build();
     }
-    @PutMapping("{clienteId}/confirmar-pagamento")
+    @PutMapping("clientes/{clienteId}/confirmar-pagamento")
     public ResponseEntity<?> confirmarPagamento(
             @PathVariable Long clienteId,
             @RequestParam String codigoAcessoCliente,
@@ -135,6 +135,6 @@ public class PedidoV1Controller {
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarService.update(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento));
+                .body(alterarService.confirmarPagamento(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento));
     }
 }

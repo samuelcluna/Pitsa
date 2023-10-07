@@ -890,7 +890,7 @@ public class PedidoControllerTests {
             void confirmaPagamentoCartaoCredito() throws Exception {
                 // Arrange
                 // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .param("codigoAcessoCliente", cliente.getCodigoAcesso())
                                 .param("pedidoId", pedido1.getId().toString())
@@ -911,7 +911,7 @@ public class PedidoControllerTests {
             void confirmaPagamentoCartaoDebito() throws Exception {
                 // Arrange
                 // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .param("codigoAcessoCliente", cliente.getCodigoAcesso())
                                 .param("pedidoId", pedido1.getId().toString())
@@ -932,7 +932,7 @@ public class PedidoControllerTests {
             void confirmaPagamentoPIX() throws Exception {
                 // Arrange
                 // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + cliente.getId() + "/confirmar-pagamento")
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .param("codigoAcessoCliente", cliente.getCodigoAcesso())
                                 .param("pedidoId", pedido1.getId().toString())

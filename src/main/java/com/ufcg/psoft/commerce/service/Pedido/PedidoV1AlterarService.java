@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.service.Pedido;
 
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Cliente;
@@ -12,6 +13,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
 public class PedidoV1AlterarService implements PedidoAlterarService {
 
@@ -21,6 +24,12 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     ClienteRepository clienteRepository;
     @Autowired
     ModelMapper modelMapper;
+
+    private final Map<String, PagamentoStrategy> pagamentoMap = Map.of(
+      "crédito", new PagamentoCredito(),
+      "débito", new PagamentoDebito(),
+      "pix", new PagamentoPix()
+    );
 
     @Override
     public Pedido update(Long pedidoId, String codigoAcesso, PedidoPostPutRequestDTO pedidoDTO) {
@@ -39,7 +48,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     }
 
     @Override
-    public Pedido update(Long pedidoId, String codigoAcessoCliente, Long clienteId, String metodoPagamento) {
+    public PedidoResponseDTO update(Long pedidoId, String codigoAcessoCliente, Long clienteId, String metodoPagamento) {
 
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
@@ -53,18 +62,10 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         if (pedidoExistente.getStatusPagamento()) {
             throw new RuntimeException("O pedido já foi pago!");
         }
-        PagamentoStrategy tiposPagamentos;
-        if(metodoPagamento.equals("Cartão de crédito")){
-            tiposPagamentos = new PagamentoCredito();
 
-        } else if (metodoPagamento.equals("PIX")) {
-            tiposPagamentos = new PagamentoPix();
-
-        }else {
-            tiposPagamentos = new PagamentoDebito();
-        }
-        tiposPagamentos.pagar(pedidoExistente);
-        pedidoRepository.flush();
-        return pedidoExistente;
+        String tipo = metodoPagamento.replaceAll("(?i).*\\b(débito|crédito|pix)\\b.*", "$1").toLowerCase();
+        PagamentoStrategy pagamento = pagamentoMap.get(tipo);
+        pagamento.pagar(pedidoExistente);
+        return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 }

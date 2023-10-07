@@ -32,7 +32,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     );
 
     @Override
-    public Pedido update(Long pedidoId, String codigoAcesso, PedidoPostPutRequestDTO pedidoDTO) {
+    public PedidoResponseDTO update(Long pedidoId, String codigoAcesso, PedidoPostPutRequestDTO pedidoDTO) {
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
 
@@ -44,7 +44,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         }
 
         modelMapper.map(pedidoDTO, pedidoExistente);
-        return pedidoRepository.save(pedidoExistente);
+        return modelMapper.map(pedidoRepository.save(pedidoExistente), PedidoResponseDTO.class);
     }
 
     @Override

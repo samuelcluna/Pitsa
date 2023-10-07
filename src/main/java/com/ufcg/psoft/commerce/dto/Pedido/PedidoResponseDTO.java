@@ -19,8 +19,6 @@ import java.util.List;
 public class PedidoResponseDTO {
 
     @JsonProperty("id")
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @JsonProperty

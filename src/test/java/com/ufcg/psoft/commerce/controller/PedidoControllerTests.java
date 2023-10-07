@@ -248,15 +248,15 @@ public class PedidoControllerTests {
             pedidoRepository.save(pedido1);
 
             // Act
-            String responseJsonString = driver.perform(get(URI_PEDIDOS)
-                            .param("clienteId", cliente.getId().toString())
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/clientes/" + cliente.getId())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
                     .andExpect(status().isOk())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
-            List<Pedido> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
+            List<PedidoResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
             });
 
             // Assert
@@ -270,17 +270,15 @@ public class PedidoControllerTests {
             pedidoRepository.save(pedido);
 
             // Act
-            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/" + pedido.getId() + "/" + cliente.getId())
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
                     .andExpect(status().isOk())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
-            List<Pedido> listaResultados = objectMapper.readValue(responseJsonString, new TypeReference<>() {
-            });
-
-            Pedido resultado = listaResultados.get(0);
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {});
 
             // Assert
             assertAll(
@@ -300,8 +298,8 @@ public class PedidoControllerTests {
             // nenhuma necessidade além do setup()
 
             // Act
-            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/" + "999999" + "/" + cliente.getId())
-                            .param("clienteId", cliente.getId().toString())
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/999999")
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
                     .andExpect(status().isNotFound())
@@ -326,8 +324,9 @@ public class PedidoControllerTests {
                     .build());
 
             // Act
-            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/" + pedido.getId() + "/" + cliente1.getId())
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/clientes/" + cliente1.getId() + "/" + pedido.getId())
                             .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", cliente1.getCodigoAcesso())
                             .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
                     .andExpect(status().isBadRequest())
                     .andDo(print())
@@ -336,7 +335,7 @@ public class PedidoControllerTests {
             CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
 
             // Assert
-            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+            assertEquals("Código de acesso inválido!", resultado.getMessage());
         }
 
 
@@ -348,14 +347,15 @@ public class PedidoControllerTests {
             pedidoRepository.save(pedido1);
 
             // Act
-            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/" + estabelecimento.getId())
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId())
+                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
                     .andExpect(status().isOk())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
-            List<Pedido> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
+            List<PedidoResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {
             });
 
             // Assert
@@ -369,17 +369,15 @@ public class PedidoControllerTests {
             pedidoRepository.save(pedido);
 
             // Act
-            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/" + pedido.getId() + "/" + estabelecimento.getId() + "/" + estabelecimento.getCodigoAcesso())
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId() + "/" + pedido.getId())
+                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
                     .andExpect(status().isOk())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
-            List<Pedido> listaResultados = objectMapper.readValue(responseJsonString, new TypeReference<>() {
-            });
-
-            Pedido resultado = listaResultados.get(0);
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {});
 
             // Assert
             assertAll(
@@ -399,7 +397,8 @@ public class PedidoControllerTests {
             // nenhuma necessidade além do setup()
 
             // Act
-            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/" + estabelecimento.getCodigoAcesso() + "/" + estabelecimento.getId() + "/" + "999999")
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId() + "/" + "999999")
+                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
                     .andExpect(status().isNotFound())
@@ -422,17 +421,18 @@ public class PedidoControllerTests {
                     .build());
 
             // Act
-            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/" + pedido.getId() + "/" + estabelecimento1.getId() + "/" + estabelecimento1.getCodigoAcesso())
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido.getId())
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isNotFound())
                     .andDo(print())
                     .andReturn().getResponse().getContentAsString();
 
             CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
 
             // Assert
-            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+            assertEquals("O pedido para esse estabelecimento não foi encontrado!", resultado.getMessage());
         }
 
         @Test
@@ -897,9 +897,9 @@ public class PedidoControllerTests {
                         .andExpect(status().isOk()) // Codigo 200
                         .andReturn().getResponse().getContentAsString();
                 // Assert
-                Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
+                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
                 assertAll(
-                        () -> assertTrue(resultado.getStatusPagamento()),
+                        () -> assertTrue(resultado.isStatusPagamento()),
                         () -> assertEquals(10, resultado.getPreco())
                 );
             }
@@ -918,9 +918,9 @@ public class PedidoControllerTests {
                         .andExpect(status().isOk()) // Codigo 200
                         .andReturn().getResponse().getContentAsString();
                 // Assert
-                Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
+                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
                 assertAll(
-                        () -> assertTrue(resultado.getStatusPagamento()),
+                        () -> assertTrue(resultado.isStatusPagamento()),
                         () -> assertEquals(9.75, resultado.getPreco())
                 );
             }
@@ -939,9 +939,9 @@ public class PedidoControllerTests {
                         .andExpect(status().isOk()) // Codigo 200
                         .andReturn().getResponse().getContentAsString();
                 // Assert
-                Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.class);
+                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
                 assertAll(
-                        () -> assertTrue(resultado.getStatusPagamento()),
+                        () -> assertTrue(resultado.isStatusPagamento()),
                         () -> assertEquals(9.5, resultado.getPreco())
                 );
             }

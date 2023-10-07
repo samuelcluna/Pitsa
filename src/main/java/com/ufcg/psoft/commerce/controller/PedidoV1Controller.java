@@ -1,15 +1,8 @@
 package com.ufcg.psoft.commerce.controller;
 
-import com.electronwill.nightconfig.core.conversion.Path;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
-import com.ufcg.psoft.commerce.service.Pedido.ClienteObterPedidoService;
-import com.ufcg.psoft.commerce.service.Pedido.PedidoAlterarService;
-import com.ufcg.psoft.commerce.service.Pedido.PedidoCriarService;
-import com.ufcg.psoft.commerce.service.Pedido.ClienteDeletarPedidoService;
-import com.ufcg.psoft.commerce.service.Pedido.EstabelecimentoObterPedidoService;
-import com.ufcg.psoft.commerce.service.Pedido.EstabelecimentoDeletarPedidoService;
+import com.ufcg.psoft.commerce.service.Pedido.*;
 import jakarta.validation.Valid;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,13 +19,11 @@ public class PedidoV1Controller {
     @Autowired
     PedidoCriarService criarService;
     @Autowired
-    ClienteObterPedidoService clienteObterPedidoService;
+    PedidoObterService obterService;
     @Autowired
     PedidoAlterarService pedidoAlterarService;
     @Autowired
     ClienteDeletarPedidoService clienteDeletarPedidoService;
-    @Autowired
-    EstabelecimentoObterPedidoService estabelecimentoObterPedidoService;
     @Autowired
     EstabelecimentoDeletarPedidoService estabelecimentoDeletarPedidoService;
 
@@ -48,25 +39,26 @@ public class PedidoV1Controller {
                 .body(criarService.save(pedidoDTO, estabelecimentoId, clienteId, clienteCodigoAcesso));
     }
 
-    @GetMapping("")
+    @GetMapping("clientes/{clienteId}")
     public ResponseEntity<?> clienteObterTodosPedidos(
-            @RequestParam Long clienteId
-            ) {
+            @PathVariable Long clienteId,
+            @RequestParam String clienteCodigoAcesso) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(clienteObterPedidoService.clienteFind(null, clienteId));
+                .body(obterService.clienteObterPedidos(clienteId, clienteCodigoAcesso));
     }
 
-    @GetMapping("/{pedidoId}/{clienteId}")
+    @GetMapping("clientes/{clienteId}/{pedidoId}")
     public ResponseEntity<?> clienteObterUmPedido(
+            @PathVariable Long clienteId,
             @PathVariable Long pedidoId,
-            @PathVariable Long clienteId) {
+            @RequestParam String clienteCodigoAcesso) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(clienteObterPedidoService.clienteFind(pedidoId, clienteId));
+                .body(obterService.clienteObterPedido(pedidoId, clienteId, clienteCodigoAcesso));
     }
 
-    @PutMapping()
+    @PutMapping
     public ResponseEntity<?> alterarPedido(
             @RequestParam Long pedidoId,
             @RequestParam String codigoAcesso,
@@ -76,7 +68,7 @@ public class PedidoV1Controller {
                 .body(pedidoAlterarService.update(pedidoId, codigoAcesso, pedidoDTO));
     }
 
-    @DeleteMapping("")
+    @DeleteMapping
     public ResponseEntity<?> clienteDeletarTodosPedidos(
             @RequestParam Long clienteId) {
         clienteDeletarPedidoService.clienteDelete(null, clienteId);
@@ -85,7 +77,7 @@ public class PedidoV1Controller {
                 .body("");
     }
 
-    @DeleteMapping("/{pedidoId}/{clienteId}")
+    @DeleteMapping("{pedidoId}/{clienteId}")
     public ResponseEntity<?> clienteDeletarPedido(
             @PathVariable Long pedidoId,
             @PathVariable Long clienteId) {
@@ -95,24 +87,26 @@ public class PedidoV1Controller {
                 .body("");
     }
 
-    @GetMapping("/{estabelecimentoId}")
+    @GetMapping("estabelecimentos/{estabelecimentoId}")
     public ResponseEntity<?> estabelecimentoObterTodosPedidos(
-            @PathVariable Long estabelecimentoId) {
+            @PathVariable Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(estabelecimentoObterPedidoService.estabelecimentoFind(null, estabelecimentoId));
+                .body(obterService.estabelecimentoObterPedidos(estabelecimentoId, estabelecimentoCodigoAcesso));
     }
 
-    @GetMapping("/{pedidoId}/{estabelecimentoId}/{estabelecimentoCodigoAcesso}")
+    @GetMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}")
     public ResponseEntity<?> estabelecimentoObterUmPedido(
+            @PathVariable Long estabelecimentoId,
             @PathVariable Long pedidoId,
-            @PathVariable Long estabelecimentoId) {
+            @RequestParam String estabelecimentoCodigoAcesso) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(estabelecimentoObterPedidoService.estabelecimentoFind(pedidoId, estabelecimentoId));
+                .body(obterService.estabelecimentoObterPedido(pedidoId, estabelecimentoId, estabelecimentoCodigoAcesso));
     }
 
-    @DeleteMapping("/{pedidoId}/{estabelecimentoId}/{estabelecimentoCodigoAcesso}")
+    @DeleteMapping("{pedidoId}/{estabelecimentoId}/{estabelecimentoCodigoAcesso}")
     public ResponseEntity<?> estabelecimentoDeletarPedido(
             @PathVariable Long estabelecimentoId,
             @PathVariable Long pedidoId) {
@@ -122,7 +116,7 @@ public class PedidoV1Controller {
                 .body("");
     }
 
-    @DeleteMapping("/{estabelecimentoId}")
+    @DeleteMapping("{estabelecimentoId}")
     public ResponseEntity<?> estabelecimentoDeletarTodosPedidos(
             @PathVariable Long estabelecimentoId) {
         estabelecimentoDeletarPedidoService.estabelecimentoDelete(null, estabelecimentoId);
@@ -130,7 +124,7 @@ public class PedidoV1Controller {
                 .status(HttpStatus.NO_CONTENT)
                 .body("");
     }
-    @PutMapping("/{clienteId}/confirmar-pagamento")
+    @PutMapping("{clienteId}/confirmar-pagamento")
     public ResponseEntity<?> confirmarPagamento(
             @PathVariable Long clienteId,
             @RequestParam String codigoAcessoCliente,

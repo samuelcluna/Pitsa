@@ -1,10 +1,7 @@
 package com.ufcg.psoft.commerce.controller;
 
 import com.ufcg.psoft.commerce.dto.Cliente.ClientePostPutRequestDTO;
-import com.ufcg.psoft.commerce.service.Cliente.ClienteV1AlterarService;
-import com.ufcg.psoft.commerce.service.Cliente.ClienteV1CriarService;
-import com.ufcg.psoft.commerce.service.Cliente.ClienteV1DeletarService;
-import com.ufcg.psoft.commerce.service.Cliente.ClienteV1ObterService;
+import com.ufcg.psoft.commerce.service.Cliente.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +23,8 @@ public class ClienteV1Controller {
     ClienteV1DeletarService deletarService;
     @Autowired
     ClienteV1ObterService obterService;
+    @Autowired
+    ClienteDemonstrarInteresseService demonstrarInteresseService;
 
     @PostMapping()
     public ResponseEntity<?> criarCliente(
@@ -55,7 +54,15 @@ public class ClienteV1Controller {
                 .status(HttpStatus.OK)
                 .body(alterarService.update(codigoAcesso, id, cliente));
     }
-
+    @PutMapping("/{id}/demonstrarInteresse")
+    public ResponseEntity<?> clienteDesmonstrarInteresseEmSabor(
+            @RequestParam String codigoAcesso,
+            @RequestParam Long saborId,
+            @PathVariable Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(demonstrarInteresseService.update(codigoAcesso, id, saborId));
+    }
     @GetMapping("/{id}")
     public ResponseEntity<?> lerCliente(
             @PathVariable Long id)

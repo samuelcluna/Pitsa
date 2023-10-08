@@ -21,10 +21,6 @@ public class Email implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @JsonProperty("proprietarioRef")
-    private String proprietarioRef;
-    @JsonProperty("emissor")
-    private String emissor;
     @JsonProperty("receptor")
     private String receptor;
     @JsonProperty("assunto")

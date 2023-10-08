@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.dto.Email;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -14,15 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmailPostDTO {
-
-    @NotBlank
-    @JsonProperty("proprietarioRef")
-    private String proprietarioRef;
-
-    @NotBlank
-    @JsonProperty("emissor")
-    @Email
-    private String emissor;
 
     @NotBlank
     @JsonProperty("receptor")

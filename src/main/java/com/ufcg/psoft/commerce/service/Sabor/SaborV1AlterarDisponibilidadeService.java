@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.service.Sabor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ufcg.psoft.commerce.dto.Cliente.ClienteResponseDTO;
 import com.ufcg.psoft.commerce.dto.Sabor.SaborPatchRequestDTO;
 import com.ufcg.psoft.commerce.dto.Sabor.SaborResponseDTO;
 import com.ufcg.psoft.commerce.exception.CommerceException;
@@ -24,6 +25,8 @@ public class SaborV1AlterarDisponibilidadeService implements SaborAlterarDisponi
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
 
+    @Autowired
+    SaborNotificaClienteService saborNotificaClienteService;
     @Autowired
     ModelMapper modelMapper;
 
@@ -49,6 +52,11 @@ public class SaborV1AlterarDisponibilidadeService implements SaborAlterarDisponi
                 throw  new CommerceException("O sabor consultado ja esta indisponivel!");
 
         saborExistente.setDisponivel(saborPatchRequestDTO.getDisponivel());
+
+        if(saborPatchRequestDTO.getDisponivel().equals(true)) {
+            String message = " Aproveite! O sabor " + saborExistente.getNome() + "esta disponivel!";
+            saborNotificaClienteService.notifyClientes(saborExistente.getClientesInteressados(), message);
+        }
 
         return modelMapper.map(saborRepository.save(saborExistente),SaborResponseDTO.class);
     }

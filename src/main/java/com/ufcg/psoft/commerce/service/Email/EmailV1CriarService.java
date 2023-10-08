@@ -1,7 +1,5 @@
 package com.ufcg.psoft.commerce.service.Email;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ufcg.psoft.commerce.dto.Associacao.AssociacaoResponseDTO;
 import com.ufcg.psoft.commerce.dto.Email.EmailPostDTO;
 import com.ufcg.psoft.commerce.model.Email;
 import com.ufcg.psoft.commerce.repository.EmailRepository;

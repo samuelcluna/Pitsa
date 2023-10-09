@@ -53,6 +53,8 @@ public class SaborControllerTests {
 
     SaborPatchRequestDTO saborPatchRequestDTO;
 
+    String emailTeste = "emailcontrollertest@gmail.com"; // COLOCAR EMAIL VÁLIDO
+
     @BeforeEach
     void setup() {
         objectMapper.registerModule(new JavaTimeModule());
@@ -834,8 +836,8 @@ public class SaborControllerTests {
         void setUp(){
             cliente = new Cliente().builder()
                     .codigoAcesso("123456")
-                    .nome("Paola Moura")
-                    .email("paola.kathrein.marques@ccc.ufcg.edu.br")
+                    .nome("Pessoa Teste")
+                    .email(emailTeste)
                     .endereco("Rua Dr Joao Moura, 157")
                     .build();
 
@@ -845,7 +847,7 @@ public class SaborControllerTests {
                     .precoM(40.0)
                     .precoG(50.0)
                     .estabelecimento(estabelecimento)
-                    .nome("Carne de tabaco com queijo de piroca")
+                    .nome("Frango com Catupiry")
                     .disponivel(false)
                     .clientesInteressados(new HashSet<>())
                     .build();

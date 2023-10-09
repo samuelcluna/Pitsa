@@ -43,12 +43,14 @@ public class EmailControllerTests {
 
     EmailPostDTO emailPostDTO;
 
+    String emailTeste = "emailcontrollertest@gmail.com"; // COLOCAR EMAIL VÁLIDO
+
     @BeforeEach
     void setup() {
         // Object Mapper suporte para LocalDateTime
         objectMapper.registerModule(new JavaTimeModule());
         email = emailRepository.save(Email.builder()
-                .receptor("victorvfreire@gmail.com")
+                .receptor(emailTeste)
                 .assunto("setup")
                 .dataDeEnvio(LocalDateTime.now())
                 .text("teste do setup")
@@ -67,7 +69,7 @@ public class EmailControllerTests {
     public void quandoOsDadosSaoValidos() throws Exception{
         EmailPostDTO emailPostDTO = EmailPostDTO.builder()
                 .assunto("testes dados validos")
-                .receptor("victorvfreire@gmail.com")
+                .receptor(emailTeste)
                 .text("testes com dados validos")
                 .build();
         String responseJsonString = driver.perform(post(URI_EMAILS)
@@ -97,7 +99,7 @@ public class EmailControllerTests {
     public void quandoOsDadosSaoInvalidos() throws Exception{
         EmailPostDTO emailPostDTO = EmailPostDTO.builder()
                 .assunto("")
-                .receptor("victorvfreire@gmail.com")
+                .receptor(emailTeste)
                 .text("testes com dados invalidos")
                 .build();
         String responseJsonString = driver.perform(post(URI_EMAILS)

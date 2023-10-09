@@ -26,6 +26,9 @@ public class Cliente {
     @JsonProperty("endereco")
     private String endereco;
 
+    @JsonProperty("email")
+    private String email;
+
     @JsonProperty("codigoAcesso")
     @Size(min = 6, max = 6, message = "Codigo de acesso deve ter exatamente 6 digitos numericos")
     private String codigoAcesso;

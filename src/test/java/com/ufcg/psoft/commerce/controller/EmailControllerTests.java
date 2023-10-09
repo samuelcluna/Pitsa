@@ -98,7 +98,7 @@ public class EmailControllerTests {
         EmailPostDTO emailPostDTO = EmailPostDTO.builder()
                 .assunto("")
                 .receptor("victorvfreire@gmail.com")
-                .text("testes com dados validos")
+                .text("testes com dados invalidos")
                 .build();
         String responseJsonString = driver.perform(post(URI_EMAILS)
                         .contentType(MediaType.APPLICATION_JSON)

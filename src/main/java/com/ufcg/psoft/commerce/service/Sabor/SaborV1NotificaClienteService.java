@@ -24,12 +24,16 @@ public class SaborV1NotificaClienteService implements SaborNotificaClienteServic
     @Override
     public List<Email> notifyClientes(Set<Long> clientesId, String message){
         List<Email> emailResponse = new ArrayList<>();
-        ClienteResponseDTO cliente = new ClienteResponseDTO();
+        ClienteResponseDTO cliente;
+
         for(Long clienteId : clientesId) {
             cliente = clienteObterService.find(clienteId);
-
-            emailResponse.add(notifyService.notify())
+            String text = "Olá " + cliente.getNome() + "! " + message;
+            String subject = "Sabor de interesse está disponível!";
+            emailResponse.add(notifyService.notify(cliente.getEmail(), subject, text));
         }
+
+        return emailResponse;
     }
 
 }

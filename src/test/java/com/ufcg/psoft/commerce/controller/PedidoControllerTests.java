@@ -152,13 +152,65 @@ public class PedidoControllerTests {
                     .andDo(print())// Codigo 201
                     .andReturn().getResponse().getContentAsString();
 
-            Pedido resultado = objectMapper.readValue(responseJsonString, Pedido.PedidoBuilder.class).build();
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.PedidoResponseDTOBuilder.class).build();
 
             // Assert
             assertAll(
                     () -> assertNotNull(resultado.getId()),
                     () -> assertEquals(pedidoPostPutRequestDTO.getEnderecoEntrega(), resultado.getEnderecoEntrega()),
                     () -> assertEquals(pedidoPostPutRequestDTO.getPizzas().get(0).getSabor1(), resultado.getPizzas().get(0).getSabor1()),
+                    () -> assertEquals(pedido.getClienteId(), resultado.getClienteId()),
+                    () -> assertEquals(pedido.getEstabelecimentoId(), resultado.getEstabelecimentoId()),
+                    () -> assertEquals(pedido.getPreco(), resultado.getPreco())
+            );
+        }
+
+        @Test
+        @DisplayName("Quando criamos um novo pedido com código de acesso inválido")
+        void quandoCriamosUmNovoPedidoComCodigoAcessoInvalido() throws Exception {
+            // Arrange
+            // Act
+            String responseJsonString = driver.perform(post(URI_PEDIDOS)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteId", cliente.getId().toString())
+                            .param("clienteCodigoAcesso", "999999")
+                            .param("estabelecimentoId", estabelecimento.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print())// Codigo 201
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+            // Assert
+            assertEquals("Código de acesso inválido!", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando criamos um novo pedido sem endereço de entrega")
+        void quandoCriamosUmNovoPedidoSemEnderecoEntrega() throws Exception {
+            // Arrange
+            PedidoPostPutRequestDTO pedidoRequest = PedidoPostPutRequestDTO.builder()
+                    .enderecoEntrega(null)
+                    .pizzas(pedido.getPizzas())
+                    .build();
+            // Act
+            String responseJsonString = driver.perform(post(URI_PEDIDOS)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteId", cliente.getId().toString())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
+                            .param("estabelecimentoId", estabelecimento.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoRequest)))
+                    .andExpect(status().isCreated())
+                    .andDo(print())// Codigo 201
+                    .andReturn().getResponse().getContentAsString();
+
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.PedidoResponseDTOBuilder.class).build();
+
+            // Assert
+            assertAll(
+                    () -> assertNotNull(resultado.getId()),
+                    () -> assertNotEquals(pedidoRequest.getEnderecoEntrega(), resultado.getEnderecoEntrega()),
+                    () -> assertEquals(pedidoRequest.getPizzas().get(0).getSabor1(), resultado.getPizzas().get(0).getSabor1()),
                     () -> assertEquals(pedido.getClienteId(), resultado.getClienteId()),
                     () -> assertEquals(pedido.getEstabelecimentoId(), resultado.getEstabelecimentoId()),
                     () -> assertEquals(pedido.getPreco(), resultado.getPreco())

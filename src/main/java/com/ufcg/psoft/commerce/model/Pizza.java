@@ -30,4 +30,19 @@ public class Pizza {
     @OneToOne
     private Sabor sabor2;
 
+    public double calcularPreco() {
+        double precoSabor1;
+        double precoSabor2;
+
+        if (tamanho.equals("grande")) {
+            precoSabor1 = sabor1.getPrecoG();
+            precoSabor2 = (sabor2 != null) ? sabor2.getPrecoG() : 0;
+        } else {
+            precoSabor1 = sabor1.getPrecoM();
+            precoSabor2 = (sabor2 != null) ? sabor2.getPrecoM() : 0;
+        }
+
+        return (precoSabor1 + precoSabor2) / ((sabor2 != null) ? 2 : 1);
+    }
+
 }

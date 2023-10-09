@@ -21,7 +21,6 @@ public class PedidoPostPutRequestDTO {
     private String enderecoEntrega;
 
     @JsonProperty
-    @ManyToOne()
     @NotEmpty(message = "Pizzas obrigatorias")
     private List<Pizza> pizzas;
 

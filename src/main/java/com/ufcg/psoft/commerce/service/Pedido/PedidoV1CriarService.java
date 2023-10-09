@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.service.Pedido;
 
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
+import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.*;
@@ -27,55 +28,37 @@ public class PedidoV1CriarService implements PedidoCriarService {
     ModelMapper modelMapper;
 
     @Override
-    public Pedido save(PedidoPostPutRequestDTO pedidoDTO, Long estabelecimentoId, Long clienteId, String clienteCodigoAcesso) {
+    public PedidoResponseDTO save(PedidoPostPutRequestDTO pedidoDTO, Long estabelecimentoId, Long clienteId, String clienteCodigoAcesso) {
         estabelecimentoRepository.findById(estabelecimentoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
         Cliente clienteExistente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
 
         if (!clienteExistente.getCodigoAcesso().equals(clienteCodigoAcesso)) {
-            throw new InvalidAccessException("Codigo de acesso invalido!");
+            throw new InvalidAccessException("Código de acesso inválido!");
         }
 
-        if (pedidoDTO.getEnderecoEntrega().isEmpty()) {
+        if (pedidoDTO.getEnderecoEntrega() == null || pedidoDTO.getEnderecoEntrega().isEmpty()) {
             pedidoDTO.setEnderecoEntrega(clienteExistente.getEndereco());
         }
 
         Pedido pedidoExistente = modelMapper.map(pedidoDTO, Pedido.class);
 
-        Double total = 0.0;
-        for (Pizza pizza : pedidoDTO.getPizzas()) {
-            saborRepository.findById(pizza.getSabor1().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("O sabor consultado nao existe!"));
-            if (pizza.getSabor2() != null) {
-                if (pizza.getTamanho().equals("media")) {
-                    throw new ResourceNotFoundException("Pizzas medias so podem ter 1 sabor!");
-                }
-                saborRepository.findById(pizza.getSabor2().getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("O sabor consultado nao existe!"));
-                if (!pizza.getSabor2().isDisponivel()) {
-                    throw new ResourceNotFoundException("O sabor consultado nao esta disponivel!");
-                }
-            }
-
-            if (!pizza.getSabor1().isDisponivel()) {
-                throw new ResourceNotFoundException("O sabor consultado nao esta disponivel!");
-            }
-
-            if (pizza.getTamanho().equals("grande") && pizza.getSabor2() == null) {
-                total += pizza.getSabor1().getPrecoG();
-            } else if (pizza.getTamanho().equals("media")) {
-                total += pizza.getSabor1().getPrecoM();
-            } else {
-                total += (pizza.getSabor1().getPrecoG() + pizza.getSabor2().getPrecoG()) / 2;
-            }
-        }
+        double total = calcularPreco(pedidoExistente);
 
         pedidoExistente.setPreco(total);
         pedidoExistente.setPizzas(pedidoDTO.getPizzas());
         pedidoExistente.setClienteId(clienteId);
         pedidoExistente.setEstabelecimentoId(estabelecimentoId);
         pedidoExistente.setStatusPagamento(false);
-        return pedidoRepository.save(pedidoExistente);
+        return modelMapper.map(pedidoRepository.save(pedidoExistente), PedidoResponseDTO.class);
+    }
+
+    private Double calcularPreco(Pedido pedido) {
+        double total = 0.0;
+        for (Pizza pizza : pedido.getPizzas()) {
+            total += pizza.calcularPreco();
+        }
+        return total;
     }
 }

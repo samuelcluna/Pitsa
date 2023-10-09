@@ -7,7 +7,7 @@ import com.ufcg.psoft.commerce.model.*;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import com.ufcg.psoft.commerce.repository.PedidoRepository;
-import com.ufcg.psoft.commerce.repository.Sabor.SaborRepository;
+import com.ufcg.psoft.commerce.repository.SaborRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

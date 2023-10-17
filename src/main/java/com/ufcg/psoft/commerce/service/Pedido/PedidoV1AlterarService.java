@@ -4,10 +4,8 @@ import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
-import com.ufcg.psoft.commerce.model.Cliente;
-import com.ufcg.psoft.commerce.model.Pedido;
-import com.ufcg.psoft.commerce.repository.ClienteRepository;
-import com.ufcg.psoft.commerce.repository.PedidoRepository;
+import com.ufcg.psoft.commerce.model.*;
+import com.ufcg.psoft.commerce.repository.*;
 import com.ufcg.psoft.commerce.service.Pedido.Pagamento.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,10 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     ClienteRepository clienteRepository;
     @Autowired
     ModelMapper modelMapper;
+    @Autowired
+    EstabelecimentoRepository estabelecimentoRepository;
+    @Autowired
+    AssociacaoRepository associacaoRepository;
 
     private final Map<String, PagamentoStrategy> pagamentoMap = Map.of(
       "crédito", new PagamentoCredito(),
@@ -66,6 +68,72 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         String tipo = metodoPagamento.replaceAll("(?i).*\\b(débito|crédito|pix)\\b.*", "$1").toLowerCase();
         PagamentoStrategy pagamento = pagamentoMap.get(tipo);
         pagamento.pagar(pedidoExistente);
+        return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
+    }
+
+    @Override
+    public PedidoResponseDTO definirPreparandoPedido(Long estabelecimentoId, String codidoAcessoEstabelecimento, Long pedidoId){
+
+        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(estabelecimentoId)
+                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
+        Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
+
+        if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
+            throw new InvalidAccessException("Codigo de acesso invalido!");
+
+        if(!pedidoExistente.getStatusPagamento()){
+            throw new InvalidAccessException("O pedido ainda não foi confirmado");
+        }
+
+        pedidoExistente.setStatusEntrega("Pedido em preparo");
+        return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
+    }
+
+    @Override
+    public PedidoResponseDTO definirPedidoPronto(Long estabelecimentoId, String codidoAcessoEstabelecimento, Long pedidoId){
+
+        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(estabelecimentoId)
+                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
+        Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
+
+        if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
+            throw new InvalidAccessException("Codigo de acesso invalido!");
+
+        if(!pedidoExistente.getStatusEntrega().equals("Pedido em preparo")){
+            throw new InvalidAccessException("O pedido ainda não foi preparado");
+        }
+
+        pedidoExistente.setStatusEntrega("Pedido pronto");
+        return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
+    }
+
+    @Override
+    public PedidoResponseDTO definirEntregador(Long estabelecimentoId, String codidoAcessoEstabelecimento, Long pedidoId, Long associacaoId){
+
+        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(estabelecimentoId)
+                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
+        Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
+        Associacao associacaoExistente = associacaoRepository.findById(associacaoId)
+                .orElseThrow(() -> new ResourceNotFoundException("O associado consultado nao existe!"));
+
+        if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
+            throw new InvalidAccessException("Codigo de acesso invalido!");
+
+        if(!associacaoExistente.getEstabelecimento().getId().equals(estabelecimentoId)){
+            throw new InvalidAccessException("Estabelecimento diferente da associacao");
+        }
+        if(!associacaoExistente.getStatus()){
+            throw new InvalidAccessException("O associado não está aprovado");
+        }
+        if(!pedidoExistente.getStatusEntrega().equals("Pedido pronto")){
+            throw new InvalidAccessException("O pedido ainda não está pronto");
+        }
+
+        pedidoExistente.setStatusEntrega("Pedido em rota");
+        pedidoExistente.setEntregadorId(associacaoExistente.getEntregador().getId());
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 }

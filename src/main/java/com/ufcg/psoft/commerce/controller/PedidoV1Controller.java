@@ -137,4 +137,36 @@ public class PedidoV1Controller {
                 .status(HttpStatus.OK)
                 .body(alterarService.confirmarPagamento(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento));
     }
+    @PutMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}/preparando-pedido")
+    public ResponseEntity<?> estabelecimentoPreparandoPedido(
+            @PathVariable Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso,
+            @RequestParam Long pedidoId
+    ){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(alterarService.definirPreparandoPedido(estabelecimentoId,estabelecimentoCodigoAcesso,pedidoId));
+    }
+    @PutMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}/pedido-pronto")
+    public ResponseEntity<?> estabelecimentoPedidoPronto(
+            @PathVariable Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso,
+            @RequestParam Long pedidoId
+    ){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(alterarService.definirPedidoPronto(estabelecimentoId,estabelecimentoCodigoAcesso,pedidoId));
+    }
+
+    @PutMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}/associar-pedido-entregador")
+    public ResponseEntity<?> estabelecimentoDefinirEntregador(
+            @PathVariable Long estabelecimentoId,
+            @RequestParam String estabelecimentoCodigoAcesso,
+            @RequestParam Long pedidoId,
+            @RequestParam Long associacaoId
+    ){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(alterarService.definirEntregador(estabelecimentoId,estabelecimentoCodigoAcesso,pedidoId,associacaoId));
+    }
 }

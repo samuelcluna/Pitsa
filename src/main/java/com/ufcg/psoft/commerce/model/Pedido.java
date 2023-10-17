@@ -44,6 +44,9 @@ public class Pedido {
     @JsonProperty("entregador")
     private Long entregadorId;
 
+    @JsonProperty("statusEntrega")
+    private String statusEntrega;
+
     @JsonProperty("status_pagamento")
     private Boolean statusPagamento;
 

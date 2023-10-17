@@ -51,6 +51,7 @@ public class PedidoV1CriarService implements PedidoCriarService {
         pedidoExistente.setClienteId(clienteId);
         pedidoExistente.setEstabelecimentoId(estabelecimentoId);
         pedidoExistente.setStatusPagamento(false);
+        pedidoExistente.setStatusEntrega("Pedido recebido");
         return modelMapper.map(pedidoRepository.save(pedidoExistente), PedidoResponseDTO.class);
     }
 

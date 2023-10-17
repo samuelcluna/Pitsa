@@ -40,4 +40,10 @@ public class PedidoResponseDTO {
     @JsonProperty("status_pagamento")
     private boolean statusPagamento;
 
+    @JsonProperty("entregador")
+    private Long entregadorId;
+
+    @JsonProperty("statusEntrega")
+    private String statusEntrega;
+
 }

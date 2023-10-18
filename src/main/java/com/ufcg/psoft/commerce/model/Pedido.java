@@ -45,7 +45,8 @@ public class Pedido {
     private Long entregadorId;
 
     @JsonProperty("statusEntrega")
-    private String statusEntrega;
+    @Builder.Default
+    private String statusEntrega = "Pedido recebido";
 
     @JsonProperty("status_pagamento")
     private Boolean statusPagamento;

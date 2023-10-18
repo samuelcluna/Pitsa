@@ -637,23 +637,23 @@ public class PedidoControllerTests {
             assertTrue(responseJsonString.isBlank());
         }
 
-//        @Test
-//        @DisplayName("Quando um cliente cancela um pedido")
-//        void quandoClienteCancelaPedido() throws Exception {
-//            // Arrange
-//            pedidoRepository.save(pedido);
-//
-//            // Act
-//            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
-//                    .andExpect(status().isNoContent())
-//                    .andDo(print())
-//                    .andReturn().getResponse().getContentAsString();
-//
-//            // Assert
-//            assertTrue(responseJsonString.isBlank());
-//        }
+        @Test
+        @DisplayName("Quando um cliente cancela um pedido")
+        void quandoClienteCancelaPedido() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+
+            // Act
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
+                    .andExpect(status().isNoContent())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            // Assert
+            assertTrue(responseJsonString.isBlank());
+        }
 //
 //        @Test
 //        @DisplayName("Quando um cliente busca um pedido feito em um estabelecimento")

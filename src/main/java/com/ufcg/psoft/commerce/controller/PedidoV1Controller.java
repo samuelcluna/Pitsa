@@ -24,6 +24,8 @@ public class PedidoV1Controller {
     PedidoAlterarService alterarService;
     @Autowired
     PedidoDeletarService deletarService;
+    @Autowired
+    PedidoCancelarService cancelarService;
 
     @PostMapping
     public ResponseEntity<?> criarPedido(
@@ -31,7 +33,7 @@ public class PedidoV1Controller {
             @RequestParam Long clienteId,
             @RequestParam String clienteCodigoAcesso,
             @RequestBody @Valid PedidoPostPutRequestDTO pedidoDTO
-            ) {
+    ) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(criarService.save(pedidoDTO, estabelecimentoId, clienteId, clienteCodigoAcesso));
@@ -126,6 +128,7 @@ public class PedidoV1Controller {
                 .status(HttpStatus.NO_CONTENT)
                 .build();
     }
+
     @PutMapping("clientes/{clienteId}/confirmar-pagamento")
     public ResponseEntity<?> confirmarPagamento(
             @PathVariable Long clienteId,
@@ -137,25 +140,27 @@ public class PedidoV1Controller {
                 .status(HttpStatus.OK)
                 .body(alterarService.confirmarPagamento(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento));
     }
+
     @PutMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}/preparando-pedido")
     public ResponseEntity<?> estabelecimentoPreparandoPedido(
             @PathVariable Long estabelecimentoId,
             @RequestParam String estabelecimentoCodigoAcesso,
             @RequestParam Long pedidoId
-    ){
+    ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarService.definirPreparandoPedido(estabelecimentoId,estabelecimentoCodigoAcesso,pedidoId));
+                .body(alterarService.definirPreparandoPedido(estabelecimentoId, estabelecimentoCodigoAcesso, pedidoId));
     }
+
     @PutMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}/pedido-pronto")
     public ResponseEntity<?> estabelecimentoPedidoPronto(
             @PathVariable Long estabelecimentoId,
             @RequestParam String estabelecimentoCodigoAcesso,
             @RequestParam Long pedidoId
-    ){
+    ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarService.definirPedidoPronto(estabelecimentoId,estabelecimentoCodigoAcesso,pedidoId));
+                .body(alterarService.definirPedidoPronto(estabelecimentoId, estabelecimentoCodigoAcesso, pedidoId));
     }
 
     @PutMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}/associar-pedido-entregador")
@@ -164,9 +169,19 @@ public class PedidoV1Controller {
             @RequestParam String estabelecimentoCodigoAcesso,
             @RequestParam Long pedidoId,
             @RequestParam Long associacaoId
-    ){
+    ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarService.definirEntregador(estabelecimentoId,estabelecimentoCodigoAcesso,pedidoId,associacaoId));
+                .body(alterarService.definirEntregador(estabelecimentoId, estabelecimentoCodigoAcesso, pedidoId, associacaoId));
+    }
+
+    @DeleteMapping("/{pedidoId}/cancelar-pedido")
+    public ResponseEntity<?> cancelarPedido(
+            @PathVariable Long pedidoId,
+            @RequestParam String clienteCodigoAcesso) {
+        cancelarService.cancelar(pedidoId, clienteCodigoAcesso);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body("");
     }
 }

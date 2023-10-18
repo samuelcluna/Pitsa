@@ -909,6 +909,48 @@ public class PedidoControllerTests {
             // Assert
             assertEquals(resultado.getStatusEntrega(), "Pedido entregue");
         }
+
+            @Test
+            @DisplayName("Quando o cliente confirma a entrega com código inválido")
+            void quandoClienteConfirmaEntregaCodigoInvalido() throws Exception {
+                // Arrange
+                pedidoRepository.save(pedido);
+                pedido.setStatusEntrega("Pedido em rota");
+
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId() + "/confirmar-entrega")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("clienteCodigoAcesso", "999999"))
+                        .andExpect(status().isBadRequest())
+                        .andDo(print())
+                        .andReturn().getResponse().getContentAsString();
+
+                CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+                // Assert
+                assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+            }
+
+            @Test
+            @DisplayName("Quando o cliente confirma a entrega o pedido com status inválido")
+            void quandoClienteConfirmaEntregaPedidoStatusInvalido() throws Exception {
+                // Arrange
+                pedidoRepository.save(pedido);
+                pedido.setStatusEntrega("Pedido em preparo");
+
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId() + "/confirmar-entrega")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
+                        .andExpect(status().isConflict())
+                        .andDo(print())
+                        .andReturn().getResponse().getContentAsString();
+
+                CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+                // Assert
+                assertEquals("Pedido com status de entrega inválido.", resultado.getMessage());
+            }
     }
 
         @Nested
@@ -997,6 +1039,45 @@ public class PedidoControllerTests {
                         () -> assertTrue(resultado.isStatusPagamento()),
                         () -> assertEquals(9.5, resultado.getPreco())
                 );
+            }
+
+            @Test
+            @DisplayName("Quando confirmamos o pagamento com código de acesso inválido")
+            void confirmaPagamentoCodigoInvalido() throws Exception {
+                // Arrange
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("codigoAcessoCliente", "999999")
+                                .param("pedidoId", pedido1.getId().toString())
+                                .param("metodoPagamento", "PIX")
+                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                        .andExpect(status().isBadRequest())
+                        .andReturn().getResponse().getContentAsString();
+                // Assert
+                CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+                assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+            }
+
+            @Test
+            @DisplayName("Quando confirmamos o pagamento de pedido já pago")
+            void confirmaPagamentoPedidoPago() throws Exception {
+                // Arrange
+                pedido1.setStatusPagamento(true);
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("codigoAcessoCliente", cliente.getCodigoAcesso())
+                                .param("pedidoId", pedido1.getId().toString())
+                                .param("metodoPagamento", "PIX")
+                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                        .andExpect(status().isConflict())
+                        .andReturn().getResponse().getContentAsString();
+                // Assert
+                CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+                assertEquals("O pedido já foi pago!", resultado.getMessage());
             }
         }
 

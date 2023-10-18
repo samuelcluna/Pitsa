@@ -3,6 +3,7 @@ package com.ufcg.psoft.commerce.service.Pedido;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
+import com.ufcg.psoft.commerce.exception.InvalidResourceException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.*;
 import com.ufcg.psoft.commerce.repository.*;
@@ -62,7 +63,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         }
 
         if (pedidoExistente.getStatusPagamento()) {
-            throw new RuntimeException("O pedido já foi pago!");
+            throw new InvalidResourceException("O pedido já foi pago!");
         }
 
         String tipo = metodoPagamento.replaceAll("(?i).*\\b(débito|crédito|pix)\\b.*", "$1").toLowerCase();
@@ -154,7 +155,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         }
 
         if (!pedidoExistente.getStatusEntrega().equals("Pedido em rota")) {
-            throw new RuntimeException("Pedido não está a caminho.");
+            throw new InvalidResourceException("Pedido com status de entrega inválido.");
         }
 
         pedidoExistente.setStatusEntrega("Pedido entregue");

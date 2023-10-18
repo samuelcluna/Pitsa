@@ -10,6 +10,8 @@ public interface PedidoAlterarService {
 
     PedidoResponseDTO confirmarPagamento(Long pedidoId, String codigoAcessoCliente, Long clienteId, String metodoPagamento);
 
+    PedidoResponseDTO confirmarEntrega(Long pedidoId, String codigoAcessoCliente, Long clienteId);
+
     PedidoResponseDTO definirPreparandoPedido(Long estabelecimentoId, String codidoAcessoEstabelecimento, Long pedidoId);
 
     PedidoResponseDTO definirPedidoPronto(Long estabelecimentoId, String codidoAcessoEstabelecimento, Long pedidoId);

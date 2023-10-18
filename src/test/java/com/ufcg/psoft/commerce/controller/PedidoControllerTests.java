@@ -889,27 +889,26 @@ public class PedidoControllerTests {
 //            assertEquals(entregador.getId(), resultado.getEntregadorId());
 //        }
 
-//        @Test
-//        @DisplayName("Quando o cliente confirma a entrega de um pedido")
-//        void quandoClienteConfirmaEntregaPedido() throws Exception {
-//            // Arrange
-//            pedidoRepository.save(pedido);
-//            pedido.setStatusEntrega("Pedido em rota");
-//
-//            // Act
-//            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + pedido.getId() + "/" + cliente.getId() + "/cliente-confirmar-entrega")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
-//                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-//                    .andExpect(status().isOk())
-//                    .andDo(print())
-//                    .andReturn().getResponse().getContentAsString();
-//
-//            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
-//
-//            // Assert
-//            assertEquals(resultado.getStatusEntrega(), "Pedido entregue");
-//        }
+        @Test
+        @DisplayName("Quando o cliente confirma a entrega de um pedido")
+        void quandoClienteConfirmaEntregaPedido() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+            pedido.setStatusEntrega("Pedido em rota");
+
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId() + "/confirmar-entrega")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
+
+            // Assert
+            assertEquals(resultado.getStatusEntrega(), "Pedido entregue");
+        }
     }
 
         @Nested

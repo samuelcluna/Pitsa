@@ -68,6 +68,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         String tipo = metodoPagamento.replaceAll("(?i).*\\b(débito|crédito|pix)\\b.*", "$1").toLowerCase();
         PagamentoStrategy pagamento = pagamentoMap.get(tipo);
         pagamento.pagar(pedidoExistente);
+        pedidoRepository.flush();
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 
@@ -87,6 +88,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         }
 
         pedidoExistente.setStatusEntrega("Pedido em preparo");
+        pedidoRepository.flush();
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 
@@ -106,6 +108,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         }
 
         pedidoExistente.setStatusEntrega("Pedido pronto");
+        pedidoRepository.flush();
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 
@@ -134,6 +137,28 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
 
         pedidoExistente.setStatusEntrega("Pedido em rota");
         pedidoExistente.setEntregadorId(associacaoExistente.getEntregador().getId());
+        pedidoRepository.flush();
+        return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
+    }
+
+    @Override
+    public PedidoResponseDTO confirmarEntrega(Long pedidoId, String codigoAcessoCliente, Long clienteId) {
+        Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
+
+        Cliente clienteExistente = clienteRepository.findById(pedidoExistente.getClienteId())
+                .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
+
+        if (!clienteExistente.getCodigoAcesso().equals(codigoAcessoCliente)) {
+            throw new InvalidAccessException("Codigo de acesso invalido!");
+        }
+
+        if (!pedidoExistente.getStatusEntrega().equals("Pedido em rota")) {
+            throw new RuntimeException("Pedido não está a caminho.");
+        }
+
+        pedidoExistente.setStatusEntrega("Pedido entregue");
+        pedidoRepository.flush();
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 }

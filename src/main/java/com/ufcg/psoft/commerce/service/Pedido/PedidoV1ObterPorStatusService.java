@@ -23,14 +23,16 @@ public class PedidoV1ObterPorStatusService implements PedidoObterPorStatusServic
     @Autowired
     PedidoRepository pedidoRepository;
     @Autowired
-    PedidoObterService pedidoObterService;
+    PedidoV1ObterService pedidoObterService;
     @Autowired
     ModelMapper modelMapper;
 
     @Override
     public List<PedidoResponseDTO> find(Long clienteId, Long estabelecimentoId, String codigoAcesso, String statusEntrega){
+
         clienteObterService.find(clienteId);
         List<Pedido> pedidosAux;
+
         if(estabelecimentoId == null && statusEntrega != null){
             pedidosAux = pedidoRepository.findAllByClienteIdAndStatusEntrega(clienteId, statusEntrega);
         } else if(estabelecimentoId != null && statusEntrega != null){
@@ -39,20 +41,7 @@ public class PedidoV1ObterPorStatusService implements PedidoObterPorStatusServic
             pedidosAux = pedidoRepository.findAllByClienteIdAndEstabelecimentoId(clienteId, estabelecimentoId);
         } else return pedidoObterService.estabelecimentoObterPedidos(clienteId, codigoAcesso);
 
-        Stack<PedidoResponseDTO> pedidoStack = new Stack<>();
-        for(Pedido pedido : pedidosAux){
-            if(pedido.getStatusEntrega().equals("Pedido entregue"))
-                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
-        }
-        for(Pedido pedido : pedidosAux){
-            if(!pedido.getStatusEntrega().equals("Pedido entregue"))
-                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
-        }
-
-        List<PedidoResponseDTO> pedidos = new ArrayList<>();
-        while((long) pedidoStack.size() > 0)
-            pedidos.add(pedidoStack.pop());
-
-        return pedidos;
+        return pedidoObterService.ordenaPedidos(pedidosAux);
     }
+
 }

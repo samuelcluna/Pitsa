@@ -39,24 +39,9 @@ public class PedidoV1ObterService implements PedidoObterService {
 
         if (!clienteExistente.getCodigoAcesso().equals(clienteCodigoAcesso)) throw new InvalidAccessException("Código de acesso inválido!");
 
-        List<PedidoResponseDTO> pedidos = new ArrayList<>();
-        Stack<PedidoResponseDTO> pedidoStack = new Stack<>();
+        List<Pedido> pedidos = pedidoRepository.findAllByClienteId(clienteId);
 
-        pedidoRepository.findAllByClienteId(clienteId).forEach(pedido -> {
-            if(pedido.getStatusEntrega().equals("Pedido entregue")) {
-                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
-            }
-        });
-        pedidoRepository.findAllByClienteId(clienteId).forEach(pedido -> {
-            if(!pedido.getStatusEntrega().equals("Pedido entregue")) {
-                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
-            }
-        });
-
-        while((long) pedidoStack.size() > 0)
-            pedidos.add(pedidoStack.pop());
-
-        return pedidos;
+        return ordenaPedidos(pedidos);
     }
 
     @Override
@@ -100,5 +85,22 @@ public class PedidoV1ObterService implements PedidoObterService {
         if (!pedidoExistente.getEstabelecimentoId().equals(estabelecimentoExistente.getId())) throw new ResourceNotFoundException("O pedido para esse estabelecimento não foi encontrado!");
 
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
+    }
+
+    public List<PedidoResponseDTO> ordenaPedidos(List<Pedido> pedidosAux){
+        Stack<PedidoResponseDTO> pedidoStack = new Stack<>();
+        for(Pedido pedido : pedidosAux){
+            if(pedido.getStatusEntrega().equals("Pedido entregue"))
+                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
+        }
+        for(Pedido pedido : pedidosAux){
+            if(!pedido.getStatusEntrega().equals("Pedido entregue"))
+                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
+        }
+
+        List<PedidoResponseDTO> pedidos = new ArrayList<>();
+        while((long) pedidoStack.size() > 0)
+            pedidos.add(pedidoStack.pop());
+        return pedidos;
     }
 }

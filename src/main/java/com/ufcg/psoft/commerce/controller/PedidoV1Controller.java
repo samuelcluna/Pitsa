@@ -139,6 +139,17 @@ public class PedidoV1Controller {
                 .body(alterarService.confirmarPagamento(pedidoId, codigoAcessoCliente, clienteId, metodoPagamento));
     }
 
+    @PutMapping("clientes/{clienteId}/{pedidoId}/confirmar-entrega")
+    public ResponseEntity<?> confirmarEntrega(
+            @PathVariable Long clienteId,
+            @PathVariable Long pedidoId,
+            @RequestParam String clienteCodigoAcesso
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(alterarService.confirmarEntrega(pedidoId, clienteCodigoAcesso, clienteId));
+    }
+    
     @PutMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}/preparando-pedido")
     public ResponseEntity<?> estabelecimentoPreparandoPedido(
             @PathVariable Long estabelecimentoId,

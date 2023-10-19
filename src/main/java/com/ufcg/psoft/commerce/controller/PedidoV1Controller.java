@@ -19,11 +19,13 @@ public class PedidoV1Controller {
     @Autowired
     PedidoCriarService criarService;
     @Autowired
-    PedidoObterService obterService;
+    PedidoV1ObterService obterService;
     @Autowired
-    PedidoAlterarService alterarService;
+    PedidoV1AlterarService alterarService;
     @Autowired
-    PedidoDeletarService deletarService;
+    PedidoV1DeletarService deletarService;
+    @Autowired
+    PedidoObterPorStatusService obterPorStatus;
 
     @PostMapping
     public ResponseEntity<?> criarPedido(
@@ -54,6 +56,15 @@ public class PedidoV1Controller {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(obterService.clienteObterPedido(pedidoId, clienteId, clienteCodigoAcesso));
+    }
+    @GetMapping("cliente-estabelecimento/{clienteId}/{estabelecimentoId}")
+    public ResponseEntity<?> clienteObterPedidosEmUmEstabelecimento(
+            @PathVariable Long clienteId,
+            @PathVariable Long estabelecimentoId,
+            @RequestParam String clienteCodigoAcesso) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(obterService.clienteObterPedido(estabelecimentoId, clienteId, clienteCodigoAcesso));
     }
 
     @PutMapping
@@ -96,6 +107,7 @@ public class PedidoV1Controller {
                 .body(obterService.estabelecimentoObterPedidos(estabelecimentoId, estabelecimentoCodigoAcesso));
     }
 
+
     @GetMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}")
     public ResponseEntity<?> estabelecimentoObterUmPedido(
             @PathVariable Long estabelecimentoId,
@@ -105,6 +117,17 @@ public class PedidoV1Controller {
                 .status(HttpStatus.OK)
                 .body(obterService.estabelecimentoObterPedido(pedidoId, estabelecimentoId, estabelecimentoCodigoAcesso));
     }
+    @GetMapping("cliente-estabelecimento/{clienteId}")
+    public ResponseEntity<?> estabelecimentoObterUmPedido(
+            @PathVariable Long clienteId,
+            @RequestParam(required = false) Long estabelecimentoId,
+            @RequestParam String clienteCodigoAcesso,
+            @RequestParam(required = false) String statusEntrega) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(obterPorStatus.find(clienteId, estabelecimentoId, clienteCodigoAcesso, statusEntrega));
+    }
+
 
     @DeleteMapping("estabelecimentos/{estabelecimentoId}/{pedidoId}")
     public ResponseEntity<?> estabelecimentoDeletarPedido(

@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.service.Pedido;
 
+import java.util.Stack;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
@@ -21,8 +22,10 @@ public class PedidoV1ObterService implements PedidoObterService {
 
     @Autowired
     PedidoRepository pedidoRepository;
+
     @Autowired
     ClienteRepository clienteRepository;
+
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
 
@@ -37,11 +40,22 @@ public class PedidoV1ObterService implements PedidoObterService {
         if (!clienteExistente.getCodigoAcesso().equals(clienteCodigoAcesso)) throw new InvalidAccessException("Código de acesso inválido!");
 
         List<PedidoResponseDTO> pedidos = new ArrayList<>();
-        pedidoRepository.findAll().forEach(pedido -> {
-            if (pedido.getClienteId().equals(clienteId)) {
-                pedidos.add(modelMapper.map(pedido, PedidoResponseDTO.class));
+        Stack<PedidoResponseDTO> pedidoStack = new Stack<>();
+
+        pedidoRepository.findAllByClienteId(clienteId).forEach(pedido -> {
+            if(pedido.getStatusEntrega().equals("Pedido entregue")) {
+                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
             }
         });
+        pedidoRepository.findAllByClienteId(clienteId).forEach(pedido -> {
+            if(!pedido.getStatusEntrega().equals("Pedido entregue")) {
+                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
+            }
+        });
+
+        while((long) pedidoStack.size() > 0)
+            pedidos.add(pedidoStack.pop());
+
         return pedidos;
     }
 

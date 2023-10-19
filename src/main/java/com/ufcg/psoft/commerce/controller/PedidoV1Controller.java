@@ -19,13 +19,11 @@ public class PedidoV1Controller {
     @Autowired
     PedidoCriarService criarService;
     @Autowired
-    PedidoObterService obterService;
+    PedidoV1ObterService obterService;
     @Autowired
-    PedidoAlterarService alterarService;
+    PedidoV1AlterarService alterarService;
     @Autowired
-    PedidoDeletarService deletarService;
-    @Autowired
-    PedidoCancelarService cancelarService;
+    PedidoV1DeletarService deletarService;
 
     @PostMapping
     public ResponseEntity<?> criarPedido(
@@ -179,7 +177,7 @@ public class PedidoV1Controller {
     public ResponseEntity<?> cancelarPedido(
             @PathVariable Long pedidoId,
             @RequestParam String clienteCodigoAcesso) {
-        cancelarService.cancelar(pedidoId, clienteCodigoAcesso);
+        deletarService.cancelar(pedidoId, clienteCodigoAcesso);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body("");

@@ -637,23 +637,65 @@ public class PedidoControllerTests {
             assertTrue(responseJsonString.isBlank());
         }
 
-//        @Test
-//        @DisplayName("Quando um cliente cancela um pedido")
-//        void quandoClienteCancelaPedido() throws Exception {
-//            // Arrange
-//            pedidoRepository.save(pedido);
-//
-//            // Act
-//            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
-//                    .andExpect(status().isNoContent())
-//                    .andDo(print())
-//                    .andReturn().getResponse().getContentAsString();
-//
-//            // Assert
-//            assertTrue(responseJsonString.isBlank());
-//        }
+        @Test
+        @DisplayName("Quando um cliente cancela um pedido")
+        void quandoClienteCancelaPedido() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+
+            // Act
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
+                    .andExpect(status().isNoContent())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            // Assert
+            assertTrue(responseJsonString.isBlank());
+        }
+
+        @Test
+        @DisplayName("Quando um cliente cancela um pedido com código de acesso inválido")
+        void quandoClienteCancelaPedidoCodigoAcessoInvalido() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+
+            // Act
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", "121212"))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando um cliente tenta cancelar um pedido que já está pronto")
+        void testCancelamentoPedidoPronto() throws Exception {
+            // Arrange
+            pedido.setStatusEntrega("Pedido pronto");
+            pedidoRepository.save(pedido);
+
+            // Act
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("Pedidos que ja estao prontos nao podem ser cancelados!", resultado.getMessage());
+        }
+
 //
 //        @Test
 //        @DisplayName("Quando um cliente busca um pedido feito em um estabelecimento")

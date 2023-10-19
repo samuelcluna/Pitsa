@@ -1147,7 +1147,7 @@ public class PedidoControllerTests {
                                 .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
                                 .param("pedidoId", pedido1.getId().toString())
                                 .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isBadRequest()) // Codigo 400
+                        .andExpect(status().isConflict()) // Codigo 409
                         .andDo(print())
                         .andReturn().getResponse().getContentAsString();
 
@@ -1209,6 +1209,35 @@ public class PedidoControllerTests {
                 assertAll(
                         () -> assertEquals("Pedido em rota", resultado.getStatusEntrega()),
                         () -> assertEquals(entregador.getId(),resultado.getEntregadorId())
+                );
+            }
+
+            @Test
+            @DisplayName("Definindo entregador com associacao False")
+            void definindoEntregadorFalse() throws Exception{
+                //Arrange
+                pedido1.setStatusEntrega("Pedido pronto");
+                Associacao associacao = associacaoRepository.save(
+                        Associacao.builder()
+                                .entregador(entregador)
+                                .estabelecimento(estabelecimento1)
+                                .status(false)
+                                .build()
+                );
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                                .param("pedidoId", pedido1.getId().toString())
+                                .param("associacaoId", associacao.getId().toString())
+                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                        .andExpect(status().isConflict()) // Codigo 409
+                        .andDo(print())
+                        .andReturn().getResponse().getContentAsString();
+
+                // Assert
+                assertAll(
+                        () -> assertNull(pedido1.getEntregadorId())
                 );
             }
         }

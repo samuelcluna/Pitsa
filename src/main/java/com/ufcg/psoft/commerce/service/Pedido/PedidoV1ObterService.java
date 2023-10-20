@@ -7,6 +7,7 @@ import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.model.Pedido;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import com.ufcg.psoft.commerce.repository.PedidoRepository;
@@ -90,11 +91,11 @@ public class PedidoV1ObterService implements PedidoObterService {
     public List<PedidoResponseDTO> ordenaPedidos(List<Pedido> pedidosAux){
         Stack<PedidoResponseDTO> pedidoStack = new Stack<>();
         for(Pedido pedido : pedidosAux){
-            if(pedido.getStatusEntrega().equals("Pedido entregue"))
+            if(pedido.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE))
                 pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
         }
         for(Pedido pedido : pedidosAux){
-            if(!pedido.getStatusEntrega().equals("Pedido entregue"))
+            if(!pedido.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE))
                 pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
         }
 

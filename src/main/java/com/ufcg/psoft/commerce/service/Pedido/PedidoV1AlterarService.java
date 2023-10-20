@@ -6,6 +6,7 @@ import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.InvalidResourceException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.*;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.*;
 import com.ufcg.psoft.commerce.service.Pedido.Pagamento.*;
 import org.modelmapper.ModelMapper;
@@ -88,7 +89,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
             throw new InvalidAccessException("O pedido ainda não foi confirmado");
         }
 
-        pedidoExistente.setStatusEntrega("Pedido em preparo");
+        pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
         pedidoRepository.flush();
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
@@ -104,11 +105,11 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
             throw new InvalidAccessException("Codigo de acesso invalido!");
 
-        if(!pedidoExistente.getStatusEntrega().equals("Pedido em preparo")){
+        if(!pedidoExistente.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO)){
             throw new InvalidAccessException("O pedido ainda não foi preparado");
         }
 
-        pedidoExistente.setStatusEntrega("Pedido pronto");
+        pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
         pedidoRepository.flush();
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
@@ -132,11 +133,11 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         if(!associacaoExistente.getStatus()){
             throw new InvalidAccessException("O associado não está aprovado");
         }
-        if(!pedidoExistente.getStatusEntrega().equals("Pedido pronto")){
+        if(!pedidoExistente.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_PRONTO)){
             throw new InvalidAccessException("O pedido ainda não está pronto");
         }
 
-        pedidoExistente.setStatusEntrega("Pedido em rota");
+        pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA);
         pedidoExistente.setEntregadorId(associacaoExistente.getEntregador().getId());
         pedidoRepository.flush();
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
@@ -154,11 +155,11 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
             throw new InvalidAccessException("Codigo de acesso invalido!");
         }
 
-        if (!pedidoExistente.getStatusEntrega().equals("Pedido em rota")) {
+        if (!pedidoExistente.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA)) {
             throw new InvalidResourceException("Pedido com status de entrega inválido.");
         }
 
-        pedidoExistente.setStatusEntrega("Pedido entregue");
+        pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE);
         pedidoRepository.flush();
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }

@@ -1,6 +1,7 @@
 package com.ufcg.psoft.commerce.controller;
 
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.service.Pedido.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,7 +123,7 @@ public class PedidoV1Controller {
             @PathVariable Long clienteId,
             @RequestParam(required = false) Long estabelecimentoId,
             @RequestParam String clienteCodigoAcesso,
-            @RequestParam(required = false) String statusEntrega) {
+            @RequestParam(required = false) PedidoStatusEntregaEnum statusEntrega) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(obterPorStatus.find(clienteId, estabelecimentoId, clienteCodigoAcesso, statusEntrega));

@@ -3,6 +3,7 @@ package com.ufcg.psoft.commerce.service.Pedido;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import java.util.Stack;
 import com.ufcg.psoft.commerce.model.Pedido;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import com.ufcg.psoft.commerce.repository.PedidoRepository;
 import com.ufcg.psoft.commerce.service.Cliente.ClienteObterService;
@@ -28,7 +29,7 @@ public class PedidoV1ObterPorStatusService implements PedidoObterPorStatusServic
     ModelMapper modelMapper;
 
     @Override
-    public List<PedidoResponseDTO> find(Long clienteId, Long estabelecimentoId, String codigoAcesso, String statusEntrega){
+    public List<PedidoResponseDTO> find(Long clienteId, Long estabelecimentoId, String codigoAcesso, PedidoStatusEntregaEnum statusEntrega){
 
         clienteObterService.find(clienteId);
         List<Pedido> pedidosAux;

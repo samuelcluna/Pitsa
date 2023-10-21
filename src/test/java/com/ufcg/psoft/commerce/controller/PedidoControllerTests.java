@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -668,6 +669,127 @@ public class PedidoControllerTests {
     }
 
     @Nested
+    @DisplayName("Cliente listar com filtragem")
+    public class ClienteListarPedidosFiltrados{
+
+        Pedido pedido_recebido;
+        Pedido pedido_em_preparo;
+        Pedido pedido_pronto;
+        Pedido pedido_em_rota;
+        Pedido pedido_entregue;
+        Estabelecimento estabelecimento1;
+        @BeforeEach
+        void setUp(){
+            estabelecimento1 = Estabelecimento.builder()
+                    .codigoAcesso("131313")
+                    .sabores(List.of(sabor1, sabor2))
+                    .build();
+            estabelecimentoRepository.save(estabelecimento1);
+            pedido_recebido = Pedido.builder()
+                    .clienteId(cliente.getId())
+                    .preco(10.0)
+                    .enderecoEntrega("Casa 237")
+                    .clienteId(cliente.getId())
+                    .estabelecimentoId(estabelecimento.getId())
+                    .pizzas(List.of(pizzaM, pizzaG))
+                    .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO)
+                    .data(LocalDateTime.now())
+                    .build();
+            pedidoRepository.save(pedido_recebido);
+            pedido_em_preparo = Pedido.builder()
+                    .clienteId(cliente.getId())
+                    .preco(10.0)
+                    .enderecoEntrega("Casa 237")
+                    .clienteId(cliente.getId())
+                    .estabelecimentoId(estabelecimento.getId())
+                    .pizzas(List.of(pizzaM, pizzaG))
+                    .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO)
+                    .data(LocalDateTime.now())
+                    .build();
+            pedidoRepository.save(pedido_em_preparo);
+            pedido_pronto = Pedido.builder()
+                    .clienteId(cliente.getId())
+                    .preco(10.0)
+                    .enderecoEntrega("Casa 237")
+                    .clienteId(cliente.getId())
+                    .estabelecimentoId(estabelecimento1.getId())
+                    .pizzas(List.of(pizzaM, pizzaG))
+                    .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO)
+                    .data(LocalDateTime.now())
+                    .build();
+            pedidoRepository.save(pedido_pronto);
+            pedido_em_rota = Pedido.builder()
+                    .clienteId(cliente.getId())
+                    .preco(10.0)
+                    .enderecoEntrega("Casa 237")
+                    .clienteId(cliente.getId())
+                    .estabelecimentoId(estabelecimento1.getId())
+                    .pizzas(List.of(pizzaM, pizzaG))
+                    .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA)
+                    .data(LocalDateTime.now())
+                    .build();
+            pedidoRepository.save(pedido_em_rota);
+            pedido_entregue = Pedido.builder()
+                    .clienteId(cliente.getId())
+                    .preco(10.0)
+                    .enderecoEntrega("Casa 237")
+                    .clienteId(cliente.getId())
+                    .estabelecimentoId(estabelecimento1.getId())
+                    .pizzas(List.of(pizzaM, pizzaG))
+                    .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE)
+                    .data(LocalDateTime.now())
+                    .build();
+            pedidoRepository.save(pedido_entregue);
+        }
+        @AfterEach
+        void tearDown() {
+            clienteRepository.deleteAll();
+            estabelecimentoRepository.deleteAll();
+            pedidoRepository.deleteAll();
+            saborRepository.deleteAll();
+        }
+
+        @Test
+        @DisplayName("Cliente listar por estabelecimento")
+        void clienteListaSeusPedidosEmEstabelecimento() throws Exception {
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/cliente-estabelecimento/" + cliente.getId())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
+                            .param("estabelecimentoId", estabelecimento1.getId().toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            List<PedidoResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {});
+
+            assertEquals(3, resultado.size());
+
+            assertEquals(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA, resultado.get(0).getStatusEntrega());
+            assertEquals(PedidoStatusEntregaEnum.PEDIDO_PRONTO, resultado.get(1).getStatusEntrega());
+            assertEquals(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE, resultado.get(2).getStatusEntrega());
+
+        }
+        @Test
+        @DisplayName("Cliente listar por estabelecimento")
+        void clienteListaSeusPedidosPorStatus() throws Exception {
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/cliente-estabelecimento/" + cliente.getId())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
+                            .param("statusEntrega", PedidoStatusEntregaEnum.PEDIDO_RECEBIDO.toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            List<PedidoResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {});
+
+            assertEquals(1, resultado.size());
+            assertEquals(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO ,resultado.get(0).getStatusEntrega());
+        }
+
+    }
+    @Nested
     @DisplayName("Alteração de estado de pedido")
     public class AlteracaoEstadoPedidoTest {
         Pedido pedido1;
@@ -1037,4 +1159,3 @@ public class PedidoControllerTests {
             }
         }
     }
-}

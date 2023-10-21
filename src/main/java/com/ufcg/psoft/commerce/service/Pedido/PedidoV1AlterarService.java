@@ -2,6 +2,8 @@ package com.ufcg.psoft.commerce.service.Pedido;
 
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
+import com.ufcg.psoft.commerce.events.EventoPedidoEmRota;
+import com.ufcg.psoft.commerce.events.EventoPedidoEntregue;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.InvalidResourceException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
@@ -10,6 +12,7 @@ import com.ufcg.psoft.commerce.repository.*;
 import com.ufcg.psoft.commerce.service.Pedido.Pagamento.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -27,6 +30,8 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     EstabelecimentoRepository estabelecimentoRepository;
     @Autowired
     AssociacaoRepository associacaoRepository;
+    @Autowired
+    ApplicationEventPublisher publisher;
 
     private final Map<String, PagamentoStrategy> pagamentoMap = Map.of(
       "crédito", new PagamentoCredito(),
@@ -122,6 +127,8 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
         Associacao associacaoExistente = associacaoRepository.findById(associacaoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O associado consultado nao existe!"));
+        Cliente clienteExistente = clienteRepository.findById(pedidoExistente.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("O cliente nao eh inexistente"));
 
         if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
             throw new InvalidAccessException("Codigo de acesso invalido!");
@@ -139,6 +146,14 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         pedidoExistente.setStatusEntrega("Pedido em rota");
         pedidoExistente.setEntregadorId(associacaoExistente.getEntregador().getId());
         pedidoRepository.flush();
+        EventoPedidoEmRota evento = EventoPedidoEmRota.builder()
+                .pedido(pedidoExistente)
+                .cliente(clienteExistente)
+                .entregador(associacaoExistente.getEntregador())
+                .build();
+
+        publisher.publishEvent(evento);
+
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 
@@ -150,6 +165,9 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         Cliente clienteExistente = clienteRepository.findById(pedidoExistente.getClienteId())
                 .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
 
+        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(pedidoExistente.getEstabelecimentoId())
+                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
+
         if (!clienteExistente.getCodigoAcesso().equals(codigoAcessoCliente)) {
             throw new InvalidAccessException("Codigo de acesso invalido!");
         }
@@ -160,6 +178,14 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
 
         pedidoExistente.setStatusEntrega("Pedido entregue");
         pedidoRepository.flush();
+
+        EventoPedidoEntregue evento = EventoPedidoEntregue.builder()
+                .estabelecimento(estabelecimentoExistente)
+                .pedido(pedidoExistente)
+                .cliente(clienteExistente)
+                .build();
+        publisher.publishEvent(evento);
+
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 }

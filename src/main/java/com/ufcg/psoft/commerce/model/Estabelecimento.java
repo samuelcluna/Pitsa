@@ -29,4 +29,6 @@ public class Estabelecimento {
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Sabor> sabores;
 
+    @JsonProperty("email")
+    private String email;
 }

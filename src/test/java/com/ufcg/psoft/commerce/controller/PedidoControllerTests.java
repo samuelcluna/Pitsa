@@ -90,6 +90,7 @@ public class PedidoControllerTests {
         cliente = clienteRepository.save(Cliente.builder()
                 .nome("Anton Ego")
                 .endereco("Paris")
+                .email("victorvfreire@gmail.com")
                 .codigoAcesso("123456")
                 .build());
         entregador = entregadorRepository.save(Entregador.builder()
@@ -637,7 +638,6 @@ public class PedidoControllerTests {
                     .estabelecimentoId(estabelecimento.getId())
                     .pizzas(List.of(pizzaM, pizzaG))
                     .build());
-
             // Act
             String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -730,6 +730,7 @@ public class PedidoControllerTests {
             estabelecimento1 = Estabelecimento.builder()
                     .codigoAcesso("131313")
                     .sabores(List.of(sabor1, sabor2))
+                    .email("victorvfreire@gmail.com")
                     .build();
             estabelecimentoRepository.save(estabelecimento1);
             pedido_recebido = Pedido.builder()
@@ -1269,6 +1270,9 @@ public class PedidoControllerTests {
         @DisplayName("Definindo entregador")
         void definindoEntregador() throws Exception{
             //Arrange
+            clienteRepository.save(cliente);
+            estabelecimentoRepository.save(estabelecimento1);
+            entregadorRepository.save(entregador);
             pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
             Associacao associacao = associacaoRepository.save(
                     Associacao.builder()

@@ -72,6 +72,7 @@ public class PedidoControllerTests {
         objectMapper.registerModule(new JavaTimeModule());
         estabelecimento = estabelecimentoRepository.save(Estabelecimento.builder()
                 .codigoAcesso("654321")
+                .email("victorfreire@gmail.com")
                 .build());
         sabor1 = saborRepository.save(Sabor.builder()
                 .nome("Sabor Um")

@@ -1,12 +1,14 @@
 package com.ufcg.psoft.commerce.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,10 +47,12 @@ public class Pedido {
     private Long entregadorId;
 
     @JsonProperty("statusEntrega")
-    @Builder.Default
-    private String statusEntrega = "Pedido recebido";
+    private PedidoStatusEntregaEnum statusEntrega;
 
     @JsonProperty("status_pagamento")
     private Boolean statusPagamento;
+
+    @JsonProperty("data")
+    private LocalDateTime data;
 
 }

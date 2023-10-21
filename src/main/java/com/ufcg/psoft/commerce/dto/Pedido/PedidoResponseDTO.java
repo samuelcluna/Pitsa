@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.dto.Pedido;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ufcg.psoft.commerce.model.Pizza;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,6 +45,6 @@ public class PedidoResponseDTO {
     private Long entregadorId;
 
     @JsonProperty("statusEntrega")
-    private String statusEntrega;
+    private PedidoStatusEntregaEnum statusEntrega;
 
 }

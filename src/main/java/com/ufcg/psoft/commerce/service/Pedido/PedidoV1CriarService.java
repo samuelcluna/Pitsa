@@ -5,6 +5,7 @@ import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.*;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import com.ufcg.psoft.commerce.repository.PedidoRepository;
@@ -12,6 +13,8 @@ import com.ufcg.psoft.commerce.repository.SaborRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class PedidoV1CriarService implements PedidoCriarService {
@@ -51,6 +54,8 @@ public class PedidoV1CriarService implements PedidoCriarService {
         pedidoExistente.setClienteId(clienteId);
         pedidoExistente.setEstabelecimentoId(estabelecimentoId);
         pedidoExistente.setStatusPagamento(false);
+        pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO);
+        pedidoExistente.setData(LocalDateTime.now());
         return modelMapper.map(pedidoRepository.save(pedidoExistente), PedidoResponseDTO.class);
     }
 

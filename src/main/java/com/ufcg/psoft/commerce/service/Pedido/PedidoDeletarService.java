@@ -13,4 +13,5 @@ public interface PedidoDeletarService {
 
     void estabelecimentoDeletarTodosPedidos(Long estabelecimentoId, String estabelecimentoCodigoAcesso);
 
+    void cancelar(Long pedidoId, String codigoAcessoCliente);
 }

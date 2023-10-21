@@ -1,5 +1,6 @@
 package com.ufcg.psoft.commerce.service.Pedido;
 
+import com.ufcg.psoft.commerce.exception.CommerceException;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Cliente;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class PedidoV1DeletarService implements PedidoDeletarService{
+public class PedidoV1DeletarService implements PedidoDeletarService {
 
     @Autowired
     PedidoRepository pedidoRepository;
@@ -77,5 +78,25 @@ public class PedidoV1DeletarService implements PedidoDeletarService{
         if (!pedidoExistente.getEstabelecimentoId().equals(estabelecimentoDeleta.getId())) throw new ResourceNotFoundException("O pedido para esse estabelecimento não foi encontrado!");
 
         pedidoRepository.deleteById(pedidoId);
+    }
+
+    @Override
+    public void cancelar(Long pedidoId, String clienteCodigoAcesso) {
+        if (pedidoId != null && pedidoId > 0) {
+            Pedido pedido = pedidoRepository.findById(pedidoId)
+                    .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
+            Cliente clientePedido = clienteRepository.findById(pedido.getClienteId())
+                    .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
+
+            if (!clientePedido.getCodigoAcesso().equals(clienteCodigoAcesso)) {
+                throw new InvalidAccessException("Codigo de acesso invalido!");
+            }
+
+            if (pedido.getStatusEntrega().equals("Pedido pronto") || pedido.getStatusEntrega().equals("Pedido em rota")) {
+                throw new CommerceException("Pedidos que ja estao prontos nao podem ser cancelados!");
+            } else {
+                pedidoRepository.deleteById(pedidoId);
+            }
+        }
     }
 }

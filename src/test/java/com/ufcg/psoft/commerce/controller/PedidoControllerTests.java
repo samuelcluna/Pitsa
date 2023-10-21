@@ -650,23 +650,65 @@ public class PedidoControllerTests {
             assertTrue(responseJsonString.isBlank());
         }
 
-//        @Test
-//        @DisplayName("Quando um cliente cancela um pedido")
-//        void quandoClienteCancelaPedido() throws Exception {
-//            // Arrange
-//            pedidoRepository.save(pedido);
-//
-//            // Act
-//            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
-//                    .andExpect(status().isNoContent())
-//                    .andDo(print())
-//                    .andReturn().getResponse().getContentAsString();
-//
-//            // Assert
-//            assertTrue(responseJsonString.isBlank());
-//        }
+        @Test
+        @DisplayName("Quando um cliente cancela um pedido")
+        void quandoClienteCancelaPedido() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+
+            // Act
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
+                    .andExpect(status().isNoContent())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            // Assert
+            assertTrue(responseJsonString.isBlank());
+        }
+
+        @Test
+        @DisplayName("Quando um cliente cancela um pedido com código de acesso inválido")
+        void quandoClienteCancelaPedidoCodigoAcessoInvalido() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+
+            // Act
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", "121212"))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando um cliente tenta cancelar um pedido que já está pronto")
+        void testCancelamentoPedidoPronto() throws Exception {
+            // Arrange
+            pedido.setStatusEntrega("Pedido pronto");
+            pedidoRepository.save(pedido);
+
+            // Act
+            String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/" + pedido.getId() + "/cancelar-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("Pedidos que ja estao prontos nao podem ser cancelados!", resultado.getMessage());
+        }
+
 //
 
 
@@ -1190,7 +1232,7 @@ public class PedidoControllerTests {
                                 .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
                                 .param("pedidoId", pedido1.getId().toString())
                                 .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isBadRequest()) // Codigo 400
+                        .andExpect(status().isConflict()) // Codigo 409
                         .andDo(print())
                         .andReturn().getResponse().getContentAsString();
 
@@ -1252,6 +1294,35 @@ public class PedidoControllerTests {
                 assertAll(
                         () -> assertEquals(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA, resultado.getStatusEntrega()),
                         () -> assertEquals(entregador.getId(),resultado.getEntregadorId())
+                );
+            }
+
+            @Test
+            @DisplayName("Definindo entregador com associacao False")
+            void definindoEntregadorFalse() throws Exception{
+                //Arrange
+                pedido1.setStatusEntrega("Pedido pronto");
+                Associacao associacao = associacaoRepository.save(
+                        Associacao.builder()
+                                .entregador(entregador)
+                                .estabelecimento(estabelecimento1)
+                                .status(false)
+                                .build()
+                );
+                // Act
+                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                                .param("pedidoId", pedido1.getId().toString())
+                                .param("associacaoId", associacao.getId().toString())
+                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                        .andExpect(status().isConflict()) // Codigo 409
+                        .andDo(print())
+                        .andReturn().getResponse().getContentAsString();
+
+                // Assert
+                assertAll(
+                        () -> assertNull(pedido1.getEntregadorId())
                 );
             }
         }

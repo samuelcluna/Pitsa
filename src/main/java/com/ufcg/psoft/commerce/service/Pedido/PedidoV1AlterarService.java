@@ -83,10 +83,10 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
 
         if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
-            throw new InvalidAccessException("Codigo de acesso invalido!");
+            throw new InvalidResourceException("Codigo de acesso invalido!");
 
         if(!pedidoExistente.getStatusPagamento()){
-            throw new InvalidAccessException("O pedido ainda não foi confirmado");
+            throw new InvalidResourceException("O pedido ainda não foi confirmado");
         }
 
         pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
@@ -103,7 +103,8 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
 
         if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
-            throw new InvalidAccessException("Codigo de acesso invalido!");
+            throw new InvalidResourceException("Codigo de acesso invalido!");
+
 
         if(!pedidoExistente.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO)){
             throw new InvalidAccessException("O pedido ainda não foi preparado");
@@ -131,7 +132,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
             throw new InvalidAccessException("Estabelecimento diferente da associacao");
         }
         if(!associacaoExistente.getStatus()){
-            throw new InvalidAccessException("O associado não está aprovado");
+            throw new InvalidResourceException("O associado não está aprovado");
         }
         if(!pedidoExistente.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_PRONTO)){
             throw new InvalidAccessException("O pedido ainda não está pronto");

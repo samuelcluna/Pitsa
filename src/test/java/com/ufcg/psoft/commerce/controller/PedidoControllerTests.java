@@ -771,7 +771,7 @@ public class PedidoControllerTests {
 
         }
         @Test
-        @DisplayName("Cliente listar por estabelecimento")
+        @DisplayName("Cliente listar por status")
         void clienteListaSeusPedidosPorStatus() throws Exception {
             String responseJsonString = driver.perform(get(URI_PEDIDOS + "/cliente-estabelecimento/" + cliente.getId())
                             .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
@@ -786,6 +786,25 @@ public class PedidoControllerTests {
 
             assertEquals(1, resultado.size());
             assertEquals(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO ,resultado.get(0).getStatusEntrega());
+        }
+        @Test
+        @DisplayName("Cliente listar por estabelecimento e status")
+        void clienteListaSeusPedidosPorEstabelecimentoStatus() throws Exception {
+            pedido_em_preparo.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO);
+            pedidoRepository.flush();
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/cliente-estabelecimento/" + cliente.getId())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
+                            .param("estabelecimentoId", estabelecimento.getId().toString())
+                            .param("statusEntrega", PedidoStatusEntregaEnum.PEDIDO_RECEBIDO.toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            List<PedidoResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {});
+
+            assertEquals(2, resultado.size());
         }
 
     }

@@ -2,6 +2,8 @@ package com.ufcg.psoft.commerce.service.Pedido;
 
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import java.util.Stack;
+
+import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Pedido;
 import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
@@ -32,15 +34,11 @@ public class PedidoV1ObterPorStatusService implements PedidoObterPorStatusServic
     public List<PedidoResponseDTO> find(Long clienteId, Long estabelecimentoId, String codigoAcesso, PedidoStatusEntregaEnum statusEntrega){
 
         clienteObterService.find(clienteId);
-        List<Pedido> pedidosAux;
 
-        if(estabelecimentoId == null && statusEntrega != null){
-            pedidosAux = pedidoRepository.findAllByClienteIdAndStatusEntrega(clienteId, statusEntrega);
-        } else if(estabelecimentoId != null && statusEntrega != null){
-            pedidosAux = pedidoRepository.findAllByClienteIdAndEstabelecimentoIdAndStatusEntrega(clienteId,estabelecimentoId,statusEntrega);
-        } else if (estabelecimentoId != null ){
-            pedidosAux = pedidoRepository.findAllByClienteIdAndEstabelecimentoId(clienteId, estabelecimentoId);
-        } else return pedidoObterService.estabelecimentoObterPedidos(clienteId, codigoAcesso);
+        if(estabelecimentoId != null)
+            estabelecimentoRepository.findById(estabelecimentoId).orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado"));
+
+        List<Pedido> pedidosAux = pedidoRepository.findAllByClienteIdAndEstabelecimentoIdAndStatusEntrega(clienteId,estabelecimentoId,statusEntrega);
 
         return pedidoObterService.ordenaPedidos(pedidosAux);
     }

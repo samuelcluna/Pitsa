@@ -11,6 +11,7 @@ import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import com.ufcg.psoft.commerce.repository.PedidoRepository;
+import com.ufcg.psoft.commerce.service.Pedido.Comparator.PedidoDataStatusComparator;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,13 +66,10 @@ public class PedidoV1ObterService implements PedidoObterService {
 
         if (!estabelecimentoExistente.getCodigoAcesso().equals(estabelecimentoCodigoAcesso)) throw new InvalidAccessException("Código de acesso inválido!");
 
-        List<PedidoResponseDTO> pedidos = new ArrayList<>();
-        pedidoRepository.findAll().forEach(pedido -> {
-            if (pedido.getEstabelecimentoId().equals(estabelecimentoId)) {
-                pedidos.add(modelMapper.map(pedido, PedidoResponseDTO.class));
-            }
-        });
-        return pedidos;
+        List<Pedido> pedidosAux = pedidoRepository.findAll();
+
+
+        return ordenaPedidos(pedidosAux);
     }
 
     @Override
@@ -88,20 +86,14 @@ public class PedidoV1ObterService implements PedidoObterService {
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 
-    public List<PedidoResponseDTO> ordenaPedidos(List<Pedido> pedidosAux){
-        Stack<PedidoResponseDTO> pedidoStack = new Stack<>();
-        for(Pedido pedido : pedidosAux){
-            if(pedido.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE))
-                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
-        }
-        for(Pedido pedido : pedidosAux){
-            if(!pedido.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE))
-                pedidoStack.push(modelMapper.map(pedido, PedidoResponseDTO.class));
-        }
+public List<PedidoResponseDTO> ordenaPedidos(List<Pedido> pedidosAux){
 
+        pedidosAux.sort(new PedidoDataStatusComparator());
         List<PedidoResponseDTO> pedidos = new ArrayList<>();
-        while((long) pedidoStack.size() > 0)
-            pedidos.add(pedidoStack.pop());
+
+        for(Pedido pedido: pedidosAux)
+            pedidos.add(modelMapper.map(pedido, PedidoResponseDTO.class));
+
         return pedidos;
     }
 }

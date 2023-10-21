@@ -3,9 +3,12 @@ package com.ufcg.psoft.commerce.service.Pedido;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import java.util.Stack;
 
+import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
+import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Pedido;
 import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
+import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import com.ufcg.psoft.commerce.repository.PedidoRepository;
 import com.ufcg.psoft.commerce.service.Cliente.ClienteObterService;
@@ -20,7 +23,7 @@ import java.util.List;
 public class PedidoV1ObterPorStatusService implements PedidoObterPorStatusService {
 
     @Autowired
-    ClienteObterService clienteObterService;
+    ClienteRepository clienteRepository;
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
     @Autowired
@@ -33,10 +36,12 @@ public class PedidoV1ObterPorStatusService implements PedidoObterPorStatusServic
     @Override
     public List<PedidoResponseDTO> find(Long clienteId, Long estabelecimentoId, String codigoAcesso, PedidoStatusEntregaEnum statusEntrega){
 
-        clienteObterService.find(clienteId);
+        Cliente clienteExistente = clienteRepository.findById(clienteId).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado."));
 
+        if(!clienteExistente.getCodigoAcesso().equals(codigoAcesso))
+            throw new InvalidAccessException("Codigo de acesso inválido.");
         if(estabelecimentoId != null)
-            estabelecimentoRepository.findById(estabelecimentoId).orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado"));
+            estabelecimentoRepository.findById(estabelecimentoId).orElseThrow(() -> new ResourceNotFoundException("Estabelecimento não encontrado."));
 
         List<Pedido> pedidosAux = pedidoRepository.findAllByClienteIdAndEstabelecimentoIdAndStatusEntrega(clienteId,estabelecimentoId,statusEntrega);
 

@@ -117,6 +117,8 @@ public class PedidoControllerTests {
                 .estabelecimentoId(estabelecimento.getId())
                 .entregadorId(entregador.getId())
                 .pizzas(pizzas)
+                .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO)
+                .data(LocalDateTime.now())
                 .build();
         pedido1 = Pedido.builder()
                 .preco(10.0)
@@ -125,6 +127,8 @@ public class PedidoControllerTests {
                 .estabelecimentoId(estabelecimento.getId())
                 .entregadorId(entregador.getId())
                 .pizzas(pizzas1)
+                .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO)
+                .data(LocalDateTime.now())
                 .build();
         pedidoPostPutRequestDTO = PedidoPostPutRequestDTO.builder()
                 .enderecoEntrega(pedido.getEnderecoEntrega())
@@ -678,6 +682,7 @@ public class PedidoControllerTests {
         Pedido pedido_em_rota;
         Pedido pedido_entregue;
         Estabelecimento estabelecimento1;
+
         @BeforeEach
         void setUp(){
             estabelecimento1 = Estabelecimento.builder()
@@ -805,6 +810,79 @@ public class PedidoControllerTests {
             List<PedidoResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {});
 
             assertEquals(2, resultado.size());
+        }
+
+        @Test
+        @DisplayName("Cliente listar por estabelecimento")
+        void clienteListarComCodigoAcessoInvalido() throws Exception {
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/cliente-estabelecimento/" + cliente.getId())
+                            .param("clienteCodigoAcesso", "999999")
+                            .param("estabelecimentoId", estabelecimento1.getId().toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            assertEquals("Codigo de acesso inválido.", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Cliente listar por estabelecimento")
+        void clienteListarClienteInexistente() throws Exception {
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/cliente-estabelecimento/" + "99999")
+                            .param("clienteCodigoAcesso", "999999")
+                            .param("estabelecimentoId", estabelecimento1.getId().toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isNotFound())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            assertEquals("Cliente não encontrado.", resultado.getMessage());
+        }
+        @Test
+        @DisplayName("Cliente listar por estabelecimento")
+        void clienteListarComEstabelecimentoInexistente() throws Exception {
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/cliente-estabelecimento/" + cliente.getId())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
+                            .param("estabelecimentoId", "99999")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isNotFound())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            assertEquals("Estabelecimento não encontrado.", resultado.getMessage());
+        }
+        @Test
+        @DisplayName("Cliente listar por status com status iguais, ordenando por mais recente")
+        void clienteListarStatusIguais() throws Exception {
+
+            pedido_recebido.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA);
+            pedido_recebido.setData(LocalDateTime.now());
+            pedidoRepository.flush();
+
+            String responseJsonString = driver.perform(get(URI_PEDIDOS + "/cliente-estabelecimento/" + cliente.getId())
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso())
+                            .param("statusEntrega", PedidoStatusEntregaEnum.PEDIDO_EM_ROTA.toString())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            List<PedidoResponseDTO> resultado = objectMapper.readValue(responseJsonString, new TypeReference<>() {});
+
+            assertEquals(2, resultado.size());
+            assertEquals(estabelecimento.getId() ,resultado.get(0).getEstabelecimentoId());
+            assertEquals(estabelecimento1.getId(), resultado.get(1).getEstabelecimentoId());
         }
 
     }

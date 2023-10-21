@@ -692,7 +692,7 @@ public class PedidoControllerTests {
         @DisplayName("Quando um cliente tenta cancelar um pedido que já está pronto")
         void testCancelamentoPedidoPronto() throws Exception {
             // Arrange
-            pedido.setStatusEntrega("Pedido pronto");
+            pedido.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
             pedidoRepository.save(pedido);
 
             // Act
@@ -995,335 +995,335 @@ public class PedidoControllerTests {
             assertEquals(resultado.getStatusEntrega(), PedidoStatusEntregaEnum.PEDIDO_ENTREGUE);
         }
 
-            @Test
-            @DisplayName("Quando o cliente confirma a entrega com código inválido")
-            void quandoClienteConfirmaEntregaCodigoInvalido() throws Exception {
-                // Arrange
-                pedidoRepository.save(pedido);
-                pedido.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA);
+        @Test
+        @DisplayName("Quando o cliente confirma a entrega com código inválido")
+        void quandoClienteConfirmaEntregaCodigoInvalido() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+            pedido.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA);
 
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId() + "/confirmar-entrega")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("clienteCodigoAcesso", "999999"))
-                        .andExpect(status().isBadRequest())
-                        .andDo(print())
-                        .andReturn().getResponse().getContentAsString();
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId() + "/confirmar-entrega")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", "999999"))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
 
-                CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
 
-                // Assert
-                assertEquals("Codigo de acesso invalido!", resultado.getMessage());
-            }
-
-            @Test
-            @DisplayName("Quando o cliente confirma a entrega o pedido com status inválido")
-            void quandoClienteConfirmaEntregaPedidoStatusInvalido() throws Exception {
-                // Arrange
-                pedidoRepository.save(pedido);
-                pedido.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
-
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId() + "/confirmar-entrega")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
-                        .andExpect(status().isConflict())
-                        .andDo(print())
-                        .andReturn().getResponse().getContentAsString();
-
-                CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
-
-                // Assert
-                assertEquals("Pedido com status de entrega inválido.", resultado.getMessage());
-            }
-    }
-
-        @Nested
-        @DisplayName("Conjunto de casos de teste da confirmação de pagamento de um pedido")
-        public class PedidoConfirmarPagamentoTests {
-
-            Pedido pedido1;
-
-            @BeforeEach
-            void setUp() {
-                cliente = clienteRepository.save(Cliente.builder()
-                        .nome("Anton Ego")
-                        .endereco("Paris")
-                        .codigoAcesso("123456")
-                        .build());
-
-                pedido1 = pedidoRepository.save(Pedido.builder()
-                        .estabelecimentoId(estabelecimento.getId())
-                        .clienteId(cliente.getId())
-                        .enderecoEntrega("Rua 1")
-                        .pizzas(List.of(pizzaG))
-                        .preco(10.0)
-                        .statusPagamento(false)
-                        .build()
-                );
-            }
-
-            @Test
-            @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
-            void confirmaPagamentoCartaoCredito() throws Exception {
-                // Arrange
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("codigoAcessoCliente", cliente.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .param("metodoPagamento", "Cartão de crédito")
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isOk()) // Codigo 200
-                        .andReturn().getResponse().getContentAsString();
-                // Assert
-                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
-                assertAll(
-                        () -> assertTrue(resultado.isStatusPagamento()),
-                        () -> assertEquals(10, resultado.getPreco())
-                );
-            }
-
-            @Test
-            @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de débito")
-            void confirmaPagamentoCartaoDebito() throws Exception {
-                // Arrange
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("codigoAcessoCliente", cliente.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .param("metodoPagamento", "Cartão de débito")
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isOk()) // Codigo 200
-                        .andReturn().getResponse().getContentAsString();
-                // Assert
-                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
-                assertAll(
-                        () -> assertTrue(resultado.isStatusPagamento()),
-                        () -> assertEquals(9.75, resultado.getPreco())
-                );
-            }
-
-            @Test
-            @DisplayName("Quando confirmamos o pagamento de um pedido por Pix")
-            void confirmaPagamentoPIX() throws Exception {
-                // Arrange
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("codigoAcessoCliente", cliente.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .param("metodoPagamento", "PIX")
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isOk()) // Codigo 200
-                        .andReturn().getResponse().getContentAsString();
-                // Assert
-                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
-                assertAll(
-                        () -> assertTrue(resultado.isStatusPagamento()),
-                        () -> assertEquals(9.5, resultado.getPreco())
-                );
-            }
-
-            @Test
-            @DisplayName("Quando confirmamos o pagamento com código de acesso inválido")
-            void confirmaPagamentoCodigoInvalido() throws Exception {
-                // Arrange
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("codigoAcessoCliente", "999999")
-                                .param("pedidoId", pedido1.getId().toString())
-                                .param("metodoPagamento", "PIX")
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isBadRequest())
-                        .andReturn().getResponse().getContentAsString();
-                // Assert
-                CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
-
-                assertEquals("Codigo de acesso invalido!", resultado.getMessage());
-            }
-
-            @Test
-            @DisplayName("Quando confirmamos o pagamento de pedido já pago")
-            void confirmaPagamentoPedidoPago() throws Exception {
-                // Arrange
-                pedido1.setStatusPagamento(true);
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("codigoAcessoCliente", cliente.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .param("metodoPagamento", "PIX")
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isConflict())
-                        .andReturn().getResponse().getContentAsString();
-                // Assert
-                CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
-
-                assertEquals("O pedido já foi pago!", resultado.getMessage());
-            }
+            // Assert
+            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
         }
 
-        @Nested
-        @DisplayName("Conjunto de casos de teste de alteração de status de pedido.")
-        public class PedidoAlterarStatus {
+        @Test
+        @DisplayName("Quando o cliente confirma a entrega o pedido com status inválido")
+        void quandoClienteConfirmaEntregaPedidoStatusInvalido() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+            pedido.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
 
-            Pedido pedido1;
-            Estabelecimento estabelecimento1;
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/" + pedido.getId() + "/confirmar-entrega")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("clienteCodigoAcesso", cliente.getCodigoAcesso()))
+                    .andExpect(status().isConflict())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
 
-            @BeforeEach
-            void setUp() {
-                entregador = entregadorRepository.save(Entregador.builder()
-                        .nome("Joãozinho")
-                        .placaVeiculo("ABC-1234")
-                        .corVeiculo("Azul")
-                        .tipoVeiculo("Moto")
-                        .codigoAcesso("101010")
-                        .build());
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
 
-                estabelecimento1 = estabelecimentoRepository.save(Estabelecimento.builder()
-                        .codigoAcesso("654321")
-                        .build());
-
-                pedido1 = pedidoRepository.save(Pedido.builder()
-                        .estabelecimentoId(estabelecimento1.getId())
-                        .clienteId(cliente.getId())
-                        .enderecoEntrega("Rua 1")
-                        .pizzas(List.of(pizzaG))
-                        .preco(10.0)
-                        .statusPagamento(true)
-                        .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO)
-                        .build()
-                );
-            }
-
-            @Test
-            @DisplayName("Alterando pedido recebido para pedido em preparo")
-            void preparandoPedido() throws Exception{
-                //Arrange
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/"+ pedido1.getId() + "/preparando-pedido")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isOk()) // Codigo 200
-                        .andDo(print())
-                        .andReturn().getResponse().getContentAsString();
-
-                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
-
-                // Assert
-                assertAll(
-                        () -> assertEquals(resultado.getStatusEntrega(), PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO)
-                );
-            }
-
-            @Test
-            @DisplayName("Alterando pedido recebido para pedido em preparo, pedido não confirmado")
-            void preparandoPedidoNaoConfirmado() throws Exception{
-                //Arrange
-                pedido1.setStatusPagamento(false);
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/"+ pedido1.getId() + "/preparando-pedido")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isConflict()) // Codigo 409
-                        .andDo(print())
-                        .andReturn().getResponse().getContentAsString();
-
-                // Assert
-                assertAll(
-                        () -> assertEquals(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO, pedido1.getStatusEntrega())
-                );
-            }
-
-            @Test
-            @DisplayName("Alterando pedido recebido para pedido em preparo")
-            void pedidoPronto() throws Exception{
-                //Arrange
-                pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/pedido-pronto")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isOk()) // Codigo 200
-                        .andDo(print())
-                        .andReturn().getResponse().getContentAsString();
-
-                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
-
-                // Assert
-                assertAll(
-                        () -> assertEquals(PedidoStatusEntregaEnum.PEDIDO_PRONTO, resultado.getStatusEntrega())
-                );
-            }
-
-            @Test
-            @DisplayName("Definindo entregador")
-            void definindoEntregador() throws Exception{
-                //Arrange
-                pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
-                Associacao associacao = associacaoRepository.save(
-                        Associacao.builder()
-                                .entregador(entregador)
-                                .estabelecimento(estabelecimento1)
-                                .status(true)
-                                .build()
-                );
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .param("associacaoId", associacao.getId().toString())
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isOk()) // Codigo 200
-                        .andDo(print())
-                        .andReturn().getResponse().getContentAsString();
-
-                PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
-
-                // Assert
-                assertAll(
-                        () -> assertEquals(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA, resultado.getStatusEntrega()),
-                        () -> assertEquals(entregador.getId(),resultado.getEntregadorId())
-                );
-            }
-
-            @Test
-            @DisplayName("Definindo entregador com associacao False")
-            void definindoEntregadorFalse() throws Exception{
-                //Arrange
-                pedido1.setStatusEntrega("Pedido pronto");
-                Associacao associacao = associacaoRepository.save(
-                        Associacao.builder()
-                                .entregador(entregador)
-                                .estabelecimento(estabelecimento1)
-                                .status(false)
-                                .build()
-                );
-                // Act
-                String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
-                                .param("pedidoId", pedido1.getId().toString())
-                                .param("associacaoId", associacao.getId().toString())
-                                .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-                        .andExpect(status().isConflict()) // Codigo 409
-                        .andDo(print())
-                        .andReturn().getResponse().getContentAsString();
-
-                // Assert
-                assertAll(
-                        () -> assertNull(pedido1.getEntregadorId())
-                );
-            }
+            // Assert
+            assertEquals("Pedido com status de entrega inválido.", resultado.getMessage());
         }
     }
+
+    @Nested
+    @DisplayName("Conjunto de casos de teste da confirmação de pagamento de um pedido")
+    public class PedidoConfirmarPagamentoTests {
+
+        Pedido pedido1;
+
+        @BeforeEach
+        void setUp() {
+            cliente = clienteRepository.save(Cliente.builder()
+                    .nome("Anton Ego")
+                    .endereco("Paris")
+                    .codigoAcesso("123456")
+                    .build());
+
+            pedido1 = pedidoRepository.save(Pedido.builder()
+                    .estabelecimentoId(estabelecimento.getId())
+                    .clienteId(cliente.getId())
+                    .enderecoEntrega("Rua 1")
+                    .pizzas(List.of(pizzaG))
+                    .preco(10.0)
+                    .statusPagamento(false)
+                    .build()
+            );
+        }
+
+        @Test
+        @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de crédito")
+        void confirmaPagamentoCartaoCredito() throws Exception {
+            // Arrange
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("codigoAcessoCliente", cliente.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("metodoPagamento", "Cartão de crédito")
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk()) // Codigo 200
+                    .andReturn().getResponse().getContentAsString();
+            // Assert
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
+            assertAll(
+                    () -> assertTrue(resultado.isStatusPagamento()),
+                    () -> assertEquals(10, resultado.getPreco())
+            );
+        }
+
+        @Test
+        @DisplayName("Quando confirmamos o pagamento de um pedido por cartão de débito")
+        void confirmaPagamentoCartaoDebito() throws Exception {
+            // Arrange
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("codigoAcessoCliente", cliente.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("metodoPagamento", "Cartão de débito")
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk()) // Codigo 200
+                    .andReturn().getResponse().getContentAsString();
+            // Assert
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
+            assertAll(
+                    () -> assertTrue(resultado.isStatusPagamento()),
+                    () -> assertEquals(9.75, resultado.getPreco())
+            );
+        }
+
+        @Test
+        @DisplayName("Quando confirmamos o pagamento de um pedido por Pix")
+        void confirmaPagamentoPIX() throws Exception {
+            // Arrange
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("codigoAcessoCliente", cliente.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("metodoPagamento", "PIX")
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk()) // Codigo 200
+                    .andReturn().getResponse().getContentAsString();
+            // Assert
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
+            assertAll(
+                    () -> assertTrue(resultado.isStatusPagamento()),
+                    () -> assertEquals(9.5, resultado.getPreco())
+            );
+        }
+
+        @Test
+        @DisplayName("Quando confirmamos o pagamento com código de acesso inválido")
+        void confirmaPagamentoCodigoInvalido() throws Exception {
+            // Arrange
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("codigoAcessoCliente", "999999")
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("metodoPagamento", "PIX")
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn().getResponse().getContentAsString();
+            // Assert
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando confirmamos o pagamento de pedido já pago")
+        void confirmaPagamentoPedidoPago() throws Exception {
+            // Arrange
+            pedido1.setStatusPagamento(true);
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/clientes/" + cliente.getId() + "/confirmar-pagamento")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("codigoAcessoCliente", cliente.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("metodoPagamento", "PIX")
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isConflict())
+                    .andReturn().getResponse().getContentAsString();
+            // Assert
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            assertEquals("O pedido já foi pago!", resultado.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("Conjunto de casos de teste de alteração de status de pedido.")
+    public class PedidoAlterarStatus {
+
+        Pedido pedido1;
+        Estabelecimento estabelecimento1;
+
+        @BeforeEach
+        void setUp() {
+            entregador = entregadorRepository.save(Entregador.builder()
+                    .nome("Joãozinho")
+                    .placaVeiculo("ABC-1234")
+                    .corVeiculo("Azul")
+                    .tipoVeiculo("Moto")
+                    .codigoAcesso("101010")
+                    .build());
+
+            estabelecimento1 = estabelecimentoRepository.save(Estabelecimento.builder()
+                    .codigoAcesso("654321")
+                    .build());
+
+            pedido1 = pedidoRepository.save(Pedido.builder()
+                    .estabelecimentoId(estabelecimento1.getId())
+                    .clienteId(cliente.getId())
+                    .enderecoEntrega("Rua 1")
+                    .pizzas(List.of(pizzaG))
+                    .preco(10.0)
+                    .statusPagamento(true)
+                    .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO)
+                    .build()
+            );
+        }
+
+        @Test
+        @DisplayName("Alterando pedido recebido para pedido em preparo")
+        void preparandoPedido() throws Exception{
+            //Arrange
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/"+ pedido1.getId() + "/preparando-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk()) // Codigo 200
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(resultado.getStatusEntrega(), PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO)
+            );
+        }
+
+        @Test
+        @DisplayName("Alterando pedido recebido para pedido em preparo, pedido não confirmado")
+        void preparandoPedidoNaoConfirmado() throws Exception{
+            //Arrange
+            pedido1.setStatusPagamento(false);
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/"+ pedido1.getId() + "/preparando-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isConflict()) // Codigo 409
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO, pedido1.getStatusEntrega())
+            );
+        }
+
+        @Test
+        @DisplayName("Alterando pedido recebido para pedido em preparo")
+        void pedidoPronto() throws Exception{
+            //Arrange
+            pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/pedido-pronto")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk()) // Codigo 200
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(PedidoStatusEntregaEnum.PEDIDO_PRONTO, resultado.getStatusEntrega())
+            );
+        }
+
+        @Test
+        @DisplayName("Definindo entregador")
+        void definindoEntregador() throws Exception{
+            //Arrange
+            pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
+            Associacao associacao = associacaoRepository.save(
+                    Associacao.builder()
+                            .entregador(entregador)
+                            .estabelecimento(estabelecimento1)
+                            .status(true)
+                            .build()
+            );
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("associacaoId", associacao.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk()) // Codigo 200
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
+
+            // Assert
+            assertAll(
+                    () -> assertEquals(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA, resultado.getStatusEntrega()),
+                    () -> assertEquals(entregador.getId(),resultado.getEntregadorId())
+            );
+        }
+
+        @Test
+        @DisplayName("Definindo entregador com associacao False")
+        void definindoEntregadorFalse() throws Exception{
+            //Arrange
+            pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
+            Associacao associacao = associacaoRepository.save(
+                    Associacao.builder()
+                            .entregador(entregador)
+                            .estabelecimento(estabelecimento1)
+                            .status(false)
+                            .build()
+            );
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("associacaoId", associacao.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isConflict()) // Codigo 409
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            // Assert
+            assertAll(
+                    () -> assertNull(pedido1.getEntregadorId())
+            );
+        }
+    }
+}

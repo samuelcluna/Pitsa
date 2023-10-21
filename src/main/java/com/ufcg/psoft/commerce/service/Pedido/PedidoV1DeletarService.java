@@ -6,6 +6,7 @@ import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.model.Pedido;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
 import com.ufcg.psoft.commerce.repository.PedidoRepository;
@@ -92,7 +93,8 @@ public class PedidoV1DeletarService implements PedidoDeletarService {
                 throw new InvalidAccessException("Codigo de acesso invalido!");
             }
 
-            if (pedido.getStatusEntrega().equals("Pedido pronto") || pedido.getStatusEntrega().equals("Pedido em rota")) {
+            if ((pedido.getStatusEntrega().compareTo(PedidoStatusEntregaEnum.PEDIDO_PRONTO) <= 0)||
+                    (pedido.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE))) {
                 throw new CommerceException("Pedidos que ja estao prontos nao podem ser cancelados!");
             } else {
                 pedidoRepository.deleteById(pedidoId);

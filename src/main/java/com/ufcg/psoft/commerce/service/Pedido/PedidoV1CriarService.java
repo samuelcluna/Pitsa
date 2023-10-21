@@ -32,6 +32,7 @@ public class PedidoV1CriarService implements PedidoCriarService {
 
     @Override
     public PedidoResponseDTO save(PedidoPostPutRequestDTO pedidoDTO, Long estabelecimentoId, Long clienteId, String clienteCodigoAcesso) {
+
         estabelecimentoRepository.findById(estabelecimentoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
         Cliente clienteExistente = clienteRepository.findById(clienteId)
@@ -60,7 +61,8 @@ public class PedidoV1CriarService implements PedidoCriarService {
     }
 
     private Double calcularPreco(Pedido pedido) {
-        double total = 0.0;
+
+        Double total = 0.0;
         for (Pizza pizza : pedido.getPizzas()) {
             total += pizza.calcularPreco();
         }

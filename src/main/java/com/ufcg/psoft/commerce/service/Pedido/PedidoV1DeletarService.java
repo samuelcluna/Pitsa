@@ -27,6 +27,7 @@ public class PedidoV1DeletarService implements PedidoDeletarService {
 
     @Override
     public void clienteDeletarTodosPedidos(Long clienteId, String clienteCodigoAcesso) {
+
         Cliente clienteDeleta = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
 
@@ -42,6 +43,7 @@ public class PedidoV1DeletarService implements PedidoDeletarService {
 
     @Override
     public void clienteDeletarPedido(Long pedidoId, Long clienteId, String clienteCodigoAcesso) {
+
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
         Cliente clienteDeleta = clienteRepository.findById(pedidoExistente.getClienteId())
@@ -55,6 +57,7 @@ public class PedidoV1DeletarService implements PedidoDeletarService {
 
     @Override
     public void estabelecimentoDeletarTodosPedidos(Long estabelecimentoId, String estabelecimentoCodigoAcesso) {
+
         Estabelecimento estabelecimentoDeleta = estabelecimentoRepository.findById(estabelecimentoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
 
@@ -70,6 +73,7 @@ public class PedidoV1DeletarService implements PedidoDeletarService {
 
     @Override
     public void estabelecimentoDeletarPedido(Long pedidoId, Long estabelecimentoId, String estabelecimentoCodigoAcesso) {
+
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
         Estabelecimento estabelecimentoDeleta = estabelecimentoRepository.findById(pedidoExistente.getEstabelecimentoId())
@@ -83,7 +87,9 @@ public class PedidoV1DeletarService implements PedidoDeletarService {
 
     @Override
     public void cancelar(Long pedidoId, String clienteCodigoAcesso) {
+
         if (pedidoId != null && pedidoId > 0) {
+
             Pedido pedido = pedidoRepository.findById(pedidoId)
                     .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
             Cliente clientePedido = clienteRepository.findById(pedido.getClienteId())
@@ -93,8 +99,8 @@ public class PedidoV1DeletarService implements PedidoDeletarService {
                 throw new InvalidAccessException("Codigo de acesso invalido!");
             }
 
-            if ((pedido.getStatusEntrega().compareTo(PedidoStatusEntregaEnum.PEDIDO_PRONTO) <= 0)||
-                    (pedido.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE))) {
+            if ((pedido.getStatusEntrega().compareTo(PedidoStatusEntregaEnum.PEDIDO_PRONTO) <= 0)
+                    || (pedido.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE))) {
                 throw new CommerceException("Pedidos que ja estao prontos nao podem ser cancelados!");
             } else {
                 pedidoRepository.deleteById(pedidoId);

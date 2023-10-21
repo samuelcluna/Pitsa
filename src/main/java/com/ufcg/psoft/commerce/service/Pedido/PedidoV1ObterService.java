@@ -36,6 +36,7 @@ public class PedidoV1ObterService implements PedidoObterService {
 
     @Override
     public List<PedidoResponseDTO> clienteObterPedidos(Long clienteId, String clienteCodigoAcesso) {
+
         Cliente clienteExistente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
 
@@ -48,6 +49,7 @@ public class PedidoV1ObterService implements PedidoObterService {
 
     @Override
     public PedidoResponseDTO clienteObterPedido(Long pedidoId, Long clienteId, String clienteCodigoAcesso) {
+
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
         Cliente clienteExistente = clienteRepository.findById(pedidoExistente.getClienteId())
@@ -61,6 +63,7 @@ public class PedidoV1ObterService implements PedidoObterService {
 
     @Override
     public List<PedidoResponseDTO> estabelecimentoObterPedidos(Long estabelecimentoId, String estabelecimentoCodigoAcesso) {
+
         Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(estabelecimentoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
 
@@ -74,6 +77,7 @@ public class PedidoV1ObterService implements PedidoObterService {
 
     @Override
     public PedidoResponseDTO estabelecimentoObterPedido(Long pedidoId, Long estabelecimentoId, String estabelecimentoCodigoAcesso) {
+
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
         Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(estabelecimentoId)

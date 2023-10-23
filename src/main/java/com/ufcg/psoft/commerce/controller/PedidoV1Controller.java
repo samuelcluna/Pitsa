@@ -59,15 +59,6 @@ public class PedidoV1Controller {
                 .status(HttpStatus.OK)
                 .body(obterService.clienteObterPedido(pedidoId, clienteId, clienteCodigoAcesso));
     }
-    @GetMapping("cliente-estabelecimento/{clienteId}/{estabelecimentoId}")
-    public ResponseEntity<?> clienteObterPedidosEmUmEstabelecimento(
-            @PathVariable Long clienteId,
-            @PathVariable Long estabelecimentoId,
-            @RequestParam String clienteCodigoAcesso) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(obterService.clienteObterPedido(estabelecimentoId, clienteId, clienteCodigoAcesso));
-    }
 
     @PutMapping
     public ResponseEntity<?> alterarPedido(

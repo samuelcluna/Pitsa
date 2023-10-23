@@ -129,8 +129,8 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
         Associacao associacaoExistente = associacaoRepository.findById(associacaoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O associado consultado nao existe!"));
-        Cliente clienteExistente = clienteRepository.findById(pedidoExistente.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("O cliente nao eh inexistente"));
+        Cliente clienteExistente = clienteRepository.findById(pedidoExistente.getClienteId())
+                .orElseThrow(() -> new ResourceNotFoundException("O cliente Consultado nao existente"));
 
         if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
             throw new InvalidAccessException("Codigo de acesso invalido!");

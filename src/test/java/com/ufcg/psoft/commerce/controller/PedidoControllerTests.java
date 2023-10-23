@@ -1282,6 +1282,12 @@ public class PedidoControllerTests {
                             .status(true)
                             .build()
             );
+            cliente = clienteRepository.save(Cliente.builder()
+                    .nome("Anton Ego")
+                    .endereco("Paris")
+                    .codigoAcesso("123456")
+                    .build());
+
             // Act
             String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1306,6 +1312,11 @@ public class PedidoControllerTests {
         @DisplayName("Definindo entregador com associacao False")
         void definindoEntregadorFalse() throws Exception{
             //Arrange
+            cliente = clienteRepository.save(Cliente.builder()
+                    .nome("Anton Ego")
+                    .endereco("Paris")
+                    .codigoAcesso("123456")
+                    .build());
             pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
             Associacao associacao = associacaoRepository.save(
                     Associacao.builder()

@@ -16,5 +16,6 @@ import lombok.NoArgsConstructor;
 public class EventoPedidoEntregue {
     Estabelecimento estabelecimento;
     Pedido pedido;
+
     Cliente cliente;
 }

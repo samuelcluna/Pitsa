@@ -39,7 +39,7 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
         if (!entregador.getCodigoAcesso().equals(codigoAcesso)) {
             throw new InvalidAccessException(("Codigo de acesso invalido!"));
         }
-        if(entregador.getDisponibilidade() == DisponibilidadeEntregador.DESCANSO){
+        if(entregador.getDisponibilidade().equals(DisponibilidadeEntregador.DESCANSO)){
             entregador.setDisponibilidade(DisponibilidadeEntregador.ATIVO);
         }else{
             entregador.setDisponibilidade(DisponibilidadeEntregador.DESCANSO);

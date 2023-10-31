@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.dto.Entregador;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ufcg.psoft.commerce.model.Entregador;
+import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,12 +34,16 @@ public class EntregadorResponseDTO {
     @JsonProperty("corVeiculo")
     private String corVeiculo;
 
+    @JsonProperty("disponibilidade")
+    private DisponibilidadeEntregador disponibilidade;
+
     public EntregadorResponseDTO(Entregador entregador) {
         this.id = entregador.getId();
         this.nome = entregador.getNome();
         this.placaVeiculo = entregador.getPlacaVeiculo();
         this.tipoVeiculo = entregador.getTipoVeiculo();
         this.corVeiculo = entregador.getCorVeiculo();
+        this.disponibilidade = entregador.getDisponibilidade();
     }
 }
 

@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,4 +41,7 @@ public class Entregador {
     @JsonIgnore
     @Column(nullable = false)
     private String codigoAcesso;
+
+    @JsonProperty("disponibilidade")
+    private DisponibilidadeEntregador disponibilidade;
 }

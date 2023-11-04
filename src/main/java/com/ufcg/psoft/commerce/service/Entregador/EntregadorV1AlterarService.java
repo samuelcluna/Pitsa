@@ -4,19 +4,43 @@ import com.ufcg.psoft.commerce.dto.Entregador.EntregadorPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Entregador.EntregadorResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
+import com.ufcg.psoft.commerce.model.Associacao;
 import com.ufcg.psoft.commerce.model.Entregador;
+import com.ufcg.psoft.commerce.model.Estabelecimento;
+import com.ufcg.psoft.commerce.model.Pedido;
 import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
+import com.ufcg.psoft.commerce.repository.AssociacaoRepository;
 import com.ufcg.psoft.commerce.repository.EntregadorRepository;
+import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
+import com.ufcg.psoft.commerce.repository.PedidoRepository;
+import com.ufcg.psoft.commerce.service.Pedido.PedidoV1AlterarService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
 
 @Service
 public class EntregadorV1AlterarService implements EntregadorAlterarService {
 
     @Autowired
     EntregadorRepository entregadorRepository;
+
+    @Autowired
+    AssociacaoRepository associacaoRepository;
+
+    @Autowired
+    PedidoV1AlterarService pedidoAlterarService;
+
+    @Autowired
+    EstabelecimentoRepository estabelecimentoRepository;
+
+    @Autowired
+    PedidoRepository pedidoRepository;
 
     @Autowired
     ModelMapper modelMapper;
@@ -39,8 +63,25 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
         if (!entregador.getCodigoAcesso().equals(codigoAcesso)) {
             throw new InvalidAccessException(("Codigo de acesso invalido!"));
         }
-        if(entregador.getDisponibilidade().equals(DisponibilidadeEntregador.DESCANSO)){
+        if(!entregador.getDisponibilidade().equals(DisponibilidadeEntregador.ATIVO)){
+
             entregador.setDisponibilidade(DisponibilidadeEntregador.ATIVO);
+            entregador.setTempoDisponivel(LocalDateTime.now());
+
+            List<Pedido> pedidosEmEspera = new LinkedList<>(pedidoRepository.findAllByStatusEntregaOrderByDataAsc(PedidoStatusEntregaEnum.PEDIDO_PRONTO));
+
+            if(!pedidosEmEspera.isEmpty()){
+                for(Pedido pedido : pedidosEmEspera){
+                    Estabelecimento estabelecimento = estabelecimentoRepository.findById(pedido.getEstabelecimentoId()).orElse(null);
+                    Associacao associacao = associacaoRepository.findByEntregadorAndEstabelecimento(entregador,estabelecimento);
+                    if(associacao != null){
+                        pedidoAlterarService.definirEntregador(pedido.getEstabelecimentoId(), estabelecimento.getCodigoAcesso(), pedido.getId(), associacao.getId());
+                        entregador.setDisponibilidade(DisponibilidadeEntregador.OCUPADO);
+                        break;
+                    }
+                }
+            }
+
         }else{
             entregador.setDisponibilidade(DisponibilidadeEntregador.DESCANSO);
         }

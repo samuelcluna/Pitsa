@@ -11,6 +11,7 @@ import com.ufcg.psoft.commerce.model.*;
 import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
 import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.*;
+import com.ufcg.psoft.commerce.service.Entregador.EntregadorV1AlterarService;
 import com.ufcg.psoft.commerce.service.Pedido.Pagamento.*;
 import io.swagger.v3.oas.models.links.Link;
 import org.modelmapper.ModelMapper;
@@ -40,7 +41,8 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     AssociacaoRepository associacaoRepository;
     @Autowired
     ApplicationEventPublisher publisher;
-
+    @Autowired
+    EntregadorV1AlterarService entregadorAlterarService;
     private final Map<String, PagamentoStrategy> pagamentoMap = Map.of(
       "crédito", new PagamentoCredito(),
       "débito", new PagamentoDebito(),
@@ -204,6 +206,9 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
 
         pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE);
         pedidoRepository.flush();
+
+        Entregador entregador = entregadorRepository.findById(pedidoExistente.getEntregadorId()).orElse(null);
+        entregadorAlterarService.trocarDisponibilidade(entregador.getId(), entregador.getCodigoAcesso());
 
         EventoPedidoEntregue evento = EventoPedidoEntregue.builder()
                 .estabelecimento(estabelecimentoExistente)

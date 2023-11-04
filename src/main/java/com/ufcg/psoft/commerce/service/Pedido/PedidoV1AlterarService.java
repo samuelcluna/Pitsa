@@ -8,14 +8,19 @@ import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.InvalidResourceException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.*;
+import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
 import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.*;
 import com.ufcg.psoft.commerce.service.Pedido.Pagamento.*;
+import io.swagger.v3.oas.models.links.Link;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -25,6 +30,8 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     PedidoRepository pedidoRepository;
     @Autowired
     ClienteRepository clienteRepository;
+    @Autowired
+    EntregadorRepository entregadorRepository;
     @Autowired
     ModelMapper modelMapper;
     @Autowired
@@ -117,6 +124,23 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
 
         pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
         pedidoRepository.flush();
+
+        List<Entregador> entregadoresDisponiveis = new LinkedList<>(entregadorRepository.findAllByDisponibilidadeOrderByTempoDisponivelAsc(DisponibilidadeEntregador.ATIVO));
+
+        if(!entregadoresDisponiveis.isEmpty()){
+            for (Entregador entregador : entregadoresDisponiveis) {
+                Associacao associacao = associacaoRepository.findByEntregadorAndEstabelecimento(entregador, estabelecimentoExistente);
+                if (associacao != null) {
+                    this.definirEntregador(estabelecimentoExistente.getId(), codidoAcessoEstabelecimento, pedidoId, associacao.getId());
+                    break;
+                }
+            }
+        }
+
+        if(pedidoExistente.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_PRONTO)){
+            System.out.println("Nenhum entregador disponivel");
+        }
+
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 

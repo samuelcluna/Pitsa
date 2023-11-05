@@ -50,4 +50,11 @@ public class Entregador {
 
     @JsonProperty("tempoDisponivel")
     private LocalDateTime tempoDisponivel;
+
+    @PrePersist
+    private void setDefaultDisponibilidade() {
+        if (disponibilidade == null) {
+            setDisponibilidade(DisponibilidadeEntregador.INATIVO);
+        }
+    }
 }

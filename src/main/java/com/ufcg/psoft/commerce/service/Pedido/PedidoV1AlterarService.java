@@ -13,13 +13,11 @@ import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.*;
 import com.ufcg.psoft.commerce.service.Entregador.EntregadorV1AlterarService;
 import com.ufcg.psoft.commerce.service.Pedido.Pagamento.*;
-import io.swagger.v3.oas.models.links.Link;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

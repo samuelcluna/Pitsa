@@ -43,6 +43,9 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
     ApplicationEventPublisher publisher;
     @Autowired
     EntregadorV1AlterarService entregadorAlterarService;
+    @Autowired
+    PedidoDefinirEntregadorService pedidoDefinirEntregadorService;
+
     private final Map<String, PagamentoStrategy> pagamentoMap = Map.of(
       "crédito", new PagamentoCredito(),
       "débito", new PagamentoDebito(),
@@ -133,7 +136,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
             for (Entregador entregador : entregadoresDisponiveis) {
                 Associacao associacao = associacaoRepository.findByEntregadorAndEstabelecimento(entregador, estabelecimentoExistente);
                 if (associacao != null) {
-                    this.definirEntregador(estabelecimentoExistente.getId(), codidoAcessoEstabelecimento, pedidoId, associacao.getId());
+                    pedidoDefinirEntregadorService.definirEntregador(estabelecimentoExistente.getId(), codidoAcessoEstabelecimento, pedidoId, associacao.getId());
                     break;
                 }
             }
@@ -146,44 +149,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 
-    @Override
-    public PedidoResponseDTO definirEntregador(Long estabelecimentoId, String codidoAcessoEstabelecimento, Long pedidoId, Long associacaoId){
 
-        Estabelecimento estabelecimentoExistente = estabelecimentoRepository.findById(estabelecimentoId)
-                .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
-        Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
-                .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
-        Associacao associacaoExistente = associacaoRepository.findById(associacaoId)
-                .orElseThrow(() -> new ResourceNotFoundException("O associado consultado nao existe!"));
-        Cliente clienteExistente = clienteRepository.findById(pedidoExistente.getClienteId())
-                .orElseThrow(() -> new ResourceNotFoundException("O cliente Consultado nao existente"));
-
-        if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
-            throw new InvalidAccessException("Codigo de acesso invalido!");
-
-        if(!associacaoExistente.getEstabelecimento().getId().equals(estabelecimentoId)){
-            throw new InvalidAccessException("Estabelecimento diferente da associacao");
-        }
-        if(!associacaoExistente.getStatus()){
-            throw new InvalidResourceException("O associado não está aprovado");
-        }
-        if(!pedidoExistente.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_PRONTO)){
-            throw new InvalidAccessException("O pedido ainda não está pronto");
-        }
-
-        pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA);
-        pedidoExistente.setEntregadorId(associacaoExistente.getEntregador().getId());
-        pedidoRepository.flush();
-        EventoPedidoEmRota evento = EventoPedidoEmRota.builder()
-                .pedido(pedidoExistente)
-                .cliente(clienteExistente)
-                .entregador(associacaoExistente.getEntregador())
-                .build();
-
-        publisher.publishEvent(evento);
-
-        return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
-    }
 
     @Override
     public PedidoResponseDTO confirmarEntrega(Long pedidoId, String codigoAcessoCliente, Long clienteId) {
@@ -207,8 +173,7 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_ENTREGUE);
         pedidoRepository.flush();
 
-        Entregador entregador = entregadorRepository.findById(pedidoExistente.getEntregadorId()).orElse(null);
-        entregadorAlterarService.trocarDisponibilidade(entregador.getId(), entregador.getCodigoAcesso());
+        entregadorRepository.findById(pedidoExistente.getEntregadorId()).ifPresent(entregador -> entregadorAlterarService.trocarEstado(entregador));
 
         EventoPedidoEntregue evento = EventoPedidoEntregue.builder()
                 .estabelecimento(estabelecimentoExistente)

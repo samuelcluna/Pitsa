@@ -27,6 +27,8 @@ public class PedidoV1Controller {
     PedidoV1DeletarService deletarService;
     @Autowired
     PedidoObterPorStatusService obterPorStatus;
+    @Autowired
+    PedidoDefinirEntregadorService definirEntregadorService;
 
 
     @PostMapping
@@ -197,7 +199,7 @@ public class PedidoV1Controller {
     ) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(alterarService.definirEntregador(estabelecimentoId, estabelecimentoCodigoAcesso, pedidoId, associacaoId));
+                .body(definirEntregadorService.definirEntregador(estabelecimentoId, estabelecimentoCodigoAcesso, pedidoId, associacaoId));
     }
 
     @DeleteMapping("/{pedidoId}/cancelar-pedido")

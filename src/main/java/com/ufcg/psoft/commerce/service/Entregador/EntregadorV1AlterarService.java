@@ -4,13 +4,25 @@ import com.ufcg.psoft.commerce.dto.Entregador.EntregadorPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Entregador.EntregadorResponseDTO;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
+import com.ufcg.psoft.commerce.model.Associacao;
 import com.ufcg.psoft.commerce.model.Entregador;
+import com.ufcg.psoft.commerce.model.Estabelecimento;
+import com.ufcg.psoft.commerce.model.Pedido;
 import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
+import com.ufcg.psoft.commerce.repository.AssociacaoRepository;
 import com.ufcg.psoft.commerce.repository.EntregadorRepository;
+import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
+import com.ufcg.psoft.commerce.repository.PedidoRepository;
+import com.ufcg.psoft.commerce.service.Pedido.PedidoDefinirEntregadorService;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
 
 @Service
 public class EntregadorV1AlterarService implements EntregadorAlterarService {
@@ -19,7 +31,20 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
     EntregadorRepository entregadorRepository;
 
     @Autowired
+    AssociacaoRepository associacaoRepository;
+
+    @Autowired
+    PedidoDefinirEntregadorService pedidoDefinirEntregadorService;
+
+    @Autowired
+    EstabelecimentoRepository estabelecimentoRepository;
+
+    @Autowired
+    PedidoRepository pedidoRepository;
+
+    @Autowired
     ModelMapper modelMapper;
+
 
     @Override
     @Transactional
@@ -39,14 +64,65 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
         if (!entregador.getCodigoAcesso().equals(codigoAcesso)) {
             throw new InvalidAccessException(("Codigo de acesso invalido!"));
         }
-        if(entregador.getDisponibilidade().equals(DisponibilidadeEntregador.DESCANSO)){
-            entregador.setDisponibilidade(DisponibilidadeEntregador.ATIVO);
-        }else{
-            entregador.setDisponibilidade(DisponibilidadeEntregador.DESCANSO);
-        }
+
+        this.trocarEstado(entregador);
+
+        if(entregador.getDisponibilidade().equals(DisponibilidadeEntregador.ATIVO))
+            this.pedidosEmEspera(entregador);
+
         entregadorRepository.flush();
         return new EntregadorResponseDTO(entregador);
     }
 
+    public void trocarEstado(Entregador entregador){
 
+        if(!entregador.getDisponibilidade().equals(DisponibilidadeEntregador.ATIVO)){
+            entregador.setDisponibilidade(DisponibilidadeEntregador.ATIVO);
+            disponibilidadeEmEstabelecimentos(entregador, "adicionar");
+        }
+        else{
+            entregador.setDisponibilidade(DisponibilidadeEntregador.DESCANSO);
+            disponibilidadeEmEstabelecimentos(entregador, "remove");
+        }
+
+        entregadorRepository.flush();
+    }
+
+    public void pedidosEmEspera(Entregador entregador){
+        List<Pedido> pedidosEmEspera = new LinkedList<>(pedidoRepository.findAllByStatusEntregaOrderByDataAsc(PedidoStatusEntregaEnum.PEDIDO_PRONTO));
+
+        if(!pedidosEmEspera.isEmpty()){
+            for(Pedido pedido : pedidosEmEspera){
+                Estabelecimento estabelecimento = estabelecimentoRepository.findById(pedido.getEstabelecimentoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
+                Associacao associacao = associacaoRepository.findByEntregadorAndEstabelecimento(entregador, estabelecimento);
+                if(associacao != null){
+                    pedidoDefinirEntregadorService.definirEntregador(pedido.getEstabelecimentoId(), estabelecimento.getCodigoAcesso(), pedido.getId(), associacao.getId());
+                    entregador.setDisponibilidade(DisponibilidadeEntregador.OCUPADO);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void disponibilidadeEmEstabelecimentos(Entregador entregador, String addOrRemove) {
+        List<Associacao> associacoes = associacaoRepository.findAllByEntregador(entregador);
+
+        if (addOrRemove.equals("remove")) {
+
+            for (Associacao associacao : associacoes) {
+                Estabelecimento estabelecimento = associacao.getEstabelecimento();
+                estabelecimento.getEntregadoresDisponiveis().remove(entregador);
+            }
+
+        } else{
+
+            for(Associacao associacao : associacoes){
+                Estabelecimento estabelecimento = associacao.getEstabelecimento();
+                estabelecimento.getEntregadoresDisponiveis().add(entregador);
+            }
+
+        }
+        estabelecimentoRepository.flush();
+    }
 }

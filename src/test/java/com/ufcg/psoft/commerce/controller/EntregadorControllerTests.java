@@ -6,16 +6,19 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ufcg.psoft.commerce.dto.Entregador.EntregadorResponseDTO;
 import com.ufcg.psoft.commerce.dto.Entregador.EntregadorPostPutRequestDTO;
 import com.ufcg.psoft.commerce.exception.CustomErrorType;
-import com.ufcg.psoft.commerce.model.Entregador;
+import com.ufcg.psoft.commerce.model.*;
 import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
-import com.ufcg.psoft.commerce.repository.EntregadorRepository;
+import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
+import com.ufcg.psoft.commerce.repository.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@Transactional
 @AutoConfigureMockMvc
 @DisplayName("Testes do controlador de Entregadores")
 public class EntregadorControllerTests {
@@ -44,6 +48,19 @@ public class EntregadorControllerTests {
     EntregadorPostPutRequestDTO entregadorPostPutRequestDTO;
 
     EntregadorResponseDTO entregadorDTO;
+
+    @Autowired
+    AssociacaoRepository associacaoRepository;
+    @Autowired
+    EstabelecimentoRepository estabelecimentoRepository;
+    @Autowired
+    PedidoRepository pedidoRepository;
+    @Autowired
+    SaborRepository saborRepository;
+    @Autowired
+    PizzaRepository pizzaRepository;
+    @Autowired
+    ClienteRepository clienteRepository;
 
     @BeforeEach
     void setup() {
@@ -627,6 +644,14 @@ public class EntregadorControllerTests {
     @DisplayName("Conjunto de casos de alteração de disponibilidade do entregador")
     class EntregadorDefinirDisponibilidade {
         Entregador entregador1;
+        Entregador entregador2;
+        Estabelecimento estabelecimento;
+        Associacao associacao;
+        Pedido pedido;
+        Sabor sabor1;
+        Pizza pizzaM;
+        Cliente cliente;
+
         @BeforeEach
         void setup() {
             objectMapper.registerModule(new JavaTimeModule());
@@ -648,6 +673,50 @@ public class EntregadorControllerTests {
                     .disponibilidade(DisponibilidadeEntregador.ATIVO)
                     .build()
             );
+
+            entregador2 = entregadorRepository.save(Entregador.builder()
+                    .nome("Michael Jackson")
+                    .placaVeiculo("ABC-1234")
+                    .corVeiculo("Azul")
+                    .tipoVeiculo("moto")
+                    .codigoAcesso("654321")
+                    .disponibilidade(DisponibilidadeEntregador.DESCANSO)
+                    .build()
+            );
+
+            estabelecimento = estabelecimentoRepository.save(Estabelecimento.builder()
+                    .codigoAcesso("654321")
+                    .email("victorfreire@gmail.com")
+                    .build());
+            cliente = clienteRepository.save(Cliente.builder()
+                    .nome("Anton Ego")
+                    .endereco("Paris")
+                    .email("victorvfreire@gmail.com")
+                    .codigoAcesso("123456")
+                    .build());
+
+            sabor1 = saborRepository.save(Sabor.builder()
+                    .nome("Sabor Um")
+                    .tipo("salgado")
+                    .precoM(10.0)
+                    .precoG(20.0)
+                    .disponivel(true)
+                    .build());
+            pizzaM = Pizza.builder()
+                    .sabor1(sabor1)
+                    .tamanho("media")
+                    .build();
+            List<Pizza> pizzas = List.of(pizzaM);
+            pedido = pedidoRepository.save(Pedido.builder()
+                    .preco(10.0)
+                    .enderecoEntrega("Casa 237")
+                    .clienteId(cliente.getId())
+                    .estabelecimentoId(estabelecimento.getId())
+                    .entregadorId(entregador.getId())
+                    .pizzas(pizzas)
+                    .statusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO)
+                    .data(LocalDateTime.now())
+                    .build());
         }
 
         @Test
@@ -707,6 +776,29 @@ public class EntregadorControllerTests {
 
             // Assert
             assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando alteramos disponibilidade com pedido em espera")
+        void quandoAlteramosDisponibilidadeComPedidoEspera() throws Exception {
+            Associacao associacao = associacaoRepository.save(Associacao.builder()
+                    .entregador(entregador2)
+                    .estabelecimento(estabelecimento)
+                    .status(true)
+                    .build());
+
+            String responseJsonString = driver.perform(put(URI_ENTREGADORES + "/" + entregador2.getId() + "/disponibilidade")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("codigoAcesso", entregador2.getCodigoAcesso())
+                            .content(objectMapper.writeValueAsString(entregadorPostPutRequestDTO)))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            EntregadorResponseDTO resultado = objectMapper.readValue(responseJsonString, EntregadorResponseDTO.EntregadorResponseDTOBuilder.class).build();
+
+            // Assert
+            assertEquals(DisponibilidadeEntregador.OCUPADO, resultado.getDisponibilidade());
         }
     }
 }

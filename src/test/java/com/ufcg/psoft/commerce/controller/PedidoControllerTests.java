@@ -7,6 +7,7 @@ import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.exception.CustomErrorType;
 import com.ufcg.psoft.commerce.model.*;
+import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
 import com.ufcg.psoft.commerce.model.enums.PedidoStatusEntregaEnum;
 import com.ufcg.psoft.commerce.repository.*;
 import com.ufcg.psoft.commerce.repository.SaborRepository;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -945,36 +947,40 @@ public class PedidoControllerTests {
                     .preco(10.0)
                     .build()
             );
+            Associacao associacao = associacaoRepository.save(
+                    Associacao.builder()
+                            .entregador(entregador)
+                            .estabelecimento(estabelecimento)
+                            .status(true)
+                            .build()
+            );
         }
 
-//        @Test
-//        @DisplayName("Quando o estabelecimento associa um pedido a um entregador")
-//        void quandoEstabelecimentoAssociaPedidoEntregador() throws Exception {
-//            // Arrange
-//            pedidoRepository.save(pedido);
-//            pedido.setStatusEntrega("Pedido pronto");
-//            List<Entregador> entregadores = new LinkedList<>();
-//            entregadores.add(entregador);
-//            estabelecimento.setEntregadoresDisponiveis(entregadores);
-//            entregador.setDisponibilidade(true);
-//
-//
-//            // Act
-//            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/" + pedido.getId() + "/" + "/associar-pedido-entregador")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .param("estabelecimentoId", estabelecimento.getId().toString())
-//                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
-//                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
-//                    .andExpect(status().isOk())
-//                    .andDo(print())
-//                    .andReturn().getResponse().getContentAsString();
-//
-//            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
-//
-//            // Assert
-//            assertEquals(resultado.getStatusEntrega(), "Pedido em rota");
-//            assertEquals(entregador.getId(), resultado.getEntregadorId());
-//        }
+        @Test
+        @DisplayName("Quando o estabelecimento associa um pedido a um entregador")
+        void quandoEstabelecimentoAssociaPedidoEntregador() throws Exception {
+            // Arrange
+            pedidoRepository.save(pedido);
+            entregador.setDisponibilidade(DisponibilidadeEntregador.ATIVO);
+            estabelecimentoRepository.findById(pedido.getEstabelecimentoId()).ifPresent(estabelecimento1 -> estabelecimento1.getEntregadoresDisponiveis().add(entregador));
+            estabelecimentoRepository.flush();
+
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId() + "/" + pedido.getId() + "/pedido-pronto")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
+                            .param("pedidoId", pedido.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isOk()) // Codigo 200
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            PedidoResponseDTO resultado = objectMapper.readValue(responseJsonString, PedidoResponseDTO.class);
+
+            // Assert
+            assertEquals(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA, resultado.getStatusEntrega());
+            assertEquals(entregador.getId(), resultado.getEntregadorId());
+        }
 
         @Test
         @DisplayName("Quando o cliente confirma a entrega de um pedido")

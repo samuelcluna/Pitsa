@@ -16,5 +16,5 @@ public interface PedidoAlterarService {
 
     PedidoResponseDTO definirPedidoPronto(Long estabelecimentoId, String codidoAcessoEstabelecimento, Long pedidoId);
 
-    PedidoResponseDTO definirEntregador(Long estabelecimentoId, String codidoAcessoEstabelecimento, Long pedidoId, Long entregadorId);
+
 }

@@ -93,8 +93,9 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
 
         if(!pedidosEmEspera.isEmpty()){
             for(Pedido pedido : pedidosEmEspera){
-                Estabelecimento estabelecimento = estabelecimentoRepository.findById(pedido.getEstabelecimentoId()).orElse(null);
-                Associacao associacao = associacaoRepository.findByEntregadorAndEstabelecimento(entregador,estabelecimento);
+                Estabelecimento estabelecimento = estabelecimentoRepository.findById(pedido.getEstabelecimentoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
+                Associacao associacao = associacaoRepository.findByEntregadorAndEstabelecimento(entregador, estabelecimento);
                 if(associacao != null){
                     pedidoDefinirEntregadorService.definirEntregador(pedido.getEstabelecimentoId(), estabelecimento.getCodigoAcesso(), pedido.getId(), associacao.getId());
                     entregador.setDisponibilidade(DisponibilidadeEntregador.OCUPADO);

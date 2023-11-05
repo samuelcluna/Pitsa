@@ -45,6 +45,7 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
     @Autowired
     ModelMapper modelMapper;
 
+
     @Override
     @Transactional
     public Entregador update(Long id, EntregadorPostPutRequestDTO entregadorPostPutRequestDTO, String codigoAcesso) {
@@ -76,13 +77,12 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
     public void trocarEstado(Entregador entregador){
 
         if(!entregador.getDisponibilidade().equals(DisponibilidadeEntregador.ATIVO)){
-
             entregador.setDisponibilidade(DisponibilidadeEntregador.ATIVO);
-            entregador.setTempoDisponivel(LocalDateTime.now());
-
-        }else{
+            disponibilidadeEmEstabelecimentos(entregador, "adicionar");
+        }
+        else{
             entregador.setDisponibilidade(DisponibilidadeEntregador.DESCANSO);
-            entregador.setTempoDisponivel(null);
+            disponibilidadeEmEstabelecimentos(entregador, "remove");
         }
 
         entregadorRepository.flush();
@@ -105,4 +105,24 @@ public class EntregadorV1AlterarService implements EntregadorAlterarService {
         }
     }
 
+    public void disponibilidadeEmEstabelecimentos(Entregador entregador, String addOrRemove) {
+        List<Associacao> associacoes = associacaoRepository.findAllByEntregador(entregador);
+
+        if (addOrRemove.equals("remove")) {
+
+            for (Associacao associacao : associacoes) {
+                Estabelecimento estabelecimento = associacao.getEstabelecimento();
+                estabelecimento.getEntregadoresDisponiveis().remove(entregador);
+            }
+
+        } else{
+
+            for(Associacao associacao : associacoes){
+                Estabelecimento estabelecimento = associacao.getEstabelecimento();
+                estabelecimento.getEntregadoresDisponiveis().add(entregador);
+            }
+
+        }
+        estabelecimentoRepository.flush();
+    }
 }

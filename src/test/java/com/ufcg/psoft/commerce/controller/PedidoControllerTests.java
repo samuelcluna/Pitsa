@@ -962,6 +962,8 @@ public class PedidoControllerTests {
             // Arrange
             pedidoRepository.save(pedido);
             entregador.setDisponibilidade(DisponibilidadeEntregador.ATIVO);
+            estabelecimentoRepository.findById(pedido.getEstabelecimentoId()).ifPresent(estabelecimento1 -> estabelecimento1.getEntregadoresDisponiveis().add(entregador));
+            estabelecimentoRepository.flush();
 
             // Act
             String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId() + "/" + pedido.getId() + "/pedido-pronto")

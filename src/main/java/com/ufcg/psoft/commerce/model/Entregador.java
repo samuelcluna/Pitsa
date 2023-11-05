@@ -48,10 +48,6 @@ public class Entregador {
     @JsonProperty("disponibilidade")
     private DisponibilidadeEntregador disponibilidade;
 
-    @JsonProperty("tempoDisponivel")
-    @JsonIgnore
-    private LocalDateTime tempoDisponivel;
-
     @PrePersist
     private void setDefaultDisponibilidade() {
         if (disponibilidade == null) {

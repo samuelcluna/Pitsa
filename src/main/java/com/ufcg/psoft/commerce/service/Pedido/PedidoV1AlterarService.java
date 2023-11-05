@@ -128,19 +128,15 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
         pedidoExistente.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_PRONTO);
         pedidoRepository.flush();
 
-        List<Entregador> entregadoresDisponiveis = new LinkedList<>(entregadorRepository.findAllByDisponibilidadeOrderByTempoDisponivelAsc(DisponibilidadeEntregador.ATIVO));
+        LinkedList<Entregador> entregadoresDisponiveis = new LinkedList<>(estabelecimentoExistente.getEntregadoresDisponiveis());
+        if(!estabelecimentoExistente.getEntregadoresDisponiveis().isEmpty()){
 
-        if(!entregadoresDisponiveis.isEmpty()){
-            for (Entregador entregador : entregadoresDisponiveis) {
-                Associacao associacao = associacaoRepository.findByEntregadorAndEstabelecimento(entregador, estabelecimentoExistente);
-                if (associacao != null) {
-                    pedidoDefinirEntregadorService.definirEntregador(estabelecimentoExistente.getId(), codidoAcessoEstabelecimento, pedidoId, associacao.getId());
-                    break;
-                }
-            }
+            Associacao associacao = associacaoRepository.findByEntregadorAndEstabelecimento(entregadoresDisponiveis.getFirst(), estabelecimentoExistente);
+            entregadoresDisponiveis.removeFirst();
+            entregadorRepository.flush();
+            pedidoDefinirEntregadorService.definirEntregador(estabelecimentoId, codidoAcessoEstabelecimento, pedidoId, associacao.getId());
         }
-
-        if(pedidoExistente.getStatusEntrega().equals(PedidoStatusEntregaEnum.PEDIDO_PRONTO)){
+        else{
             System.out.println("Nenhum entregador disponivel");
         }
 

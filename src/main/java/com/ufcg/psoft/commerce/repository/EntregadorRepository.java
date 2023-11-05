@@ -9,6 +9,4 @@ import java.util.List;
 
 @Repository
 public interface EntregadorRepository extends JpaRepository<Entregador, Long> {
-
-    List<Entregador> findAllByDisponibilidadeOrderByTempoDisponivelAsc(DisponibilidadeEntregador disponibilidade);
 }

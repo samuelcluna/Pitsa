@@ -641,6 +641,7 @@ public class PedidoControllerTests {
                     .estabelecimentoId(estabelecimento.getId())
                     .pizzas(List.of(pizzaM, pizzaG))
                     .build());
+
             // Act
             String responseJsonString = driver.perform(delete(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento.getId())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1209,10 +1210,10 @@ public class PedidoControllerTests {
 
         @Test
         @DisplayName("Alterando pedido recebido para pedido em preparo")
-        void preparandoPedido() throws Exception{
+        void preparandoPedido() throws Exception {
             //Arrange
             // Act
-            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/"+ pedido1.getId() + "/preparando-pedido")
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/preparando-pedido")
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
                             .param("pedidoId", pedido1.getId().toString())
@@ -1231,11 +1232,11 @@ public class PedidoControllerTests {
 
         @Test
         @DisplayName("Alterando pedido recebido para pedido em preparo, pedido não confirmado")
-        void preparandoPedidoNaoConfirmado() throws Exception{
+        void preparandoPedidoNaoConfirmado() throws Exception {
             //Arrange
             pedido1.setStatusPagamento(false);
             // Act
-            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/"+ pedido1.getId() + "/preparando-pedido")
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/preparando-pedido")
                             .contentType(MediaType.APPLICATION_JSON)
                             .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
                             .param("pedidoId", pedido1.getId().toString())
@@ -1252,7 +1253,7 @@ public class PedidoControllerTests {
 
         @Test
         @DisplayName("Alterando pedido recebido para pedido em preparo")
-        void pedidoPronto() throws Exception{
+        void pedidoPronto() throws Exception {
             //Arrange
             pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
             // Act
@@ -1274,8 +1275,67 @@ public class PedidoControllerTests {
         }
 
         @Test
+        @DisplayName("Alterando pedido recebido com código inválido")
+        void quandoPedidoRecebidoTemCodigoInvalido() throws Exception {
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/pedido-pronto")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", "151515")
+                            .param("pedidoId", pedido1.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isConflict()) // Codigo 200
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando pedido em preparo tem código inválido")
+        void quandoPedidoEmPreparoTemCodigoInvalido() throws Exception {
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/preparando-pedido")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", "151515")
+                            .param("pedidoId", pedido1.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isConflict()) // Codigo 200
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando o pedido ainda não foi preparado")
+        void quandoPedidoAindaNaoFoiPreparado() throws Exception {
+            //Arrange
+            pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_RECEBIDO);
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/pedido-pronto")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest()) // Codigo 200
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("O pedido ainda não foi preparado", resultado.getMessage());
+        }
+
+        @Test
         @DisplayName("Definindo entregador")
-        void definindoEntregador() throws Exception{
+        void definindoEntregador() throws Exception {
             //Arrange
             clienteRepository.save(cliente);
             estabelecimentoRepository.save(estabelecimento1);
@@ -1310,13 +1370,13 @@ public class PedidoControllerTests {
             // Assert
             assertAll(
                     () -> assertEquals(PedidoStatusEntregaEnum.PEDIDO_EM_ROTA, resultado.getStatusEntrega()),
-                    () -> assertEquals(entregador.getId(),resultado.getEntregadorId())
+                    () -> assertEquals(entregador.getId(), resultado.getEntregadorId())
             );
         }
 
         @Test
         @DisplayName("Definindo entregador com associacao False")
-        void definindoEntregadorFalse() throws Exception{
+        void definindoEntregadorFalse() throws Exception {
             //Arrange
             cliente = clienteRepository.save(Cliente.builder()
                     .nome("Anton Ego")
@@ -1346,6 +1406,111 @@ public class PedidoControllerTests {
             assertAll(
                     () -> assertNull(pedido1.getEntregadorId())
             );
+        }
+
+        @Test
+        @DisplayName("Quando pedido ainda não está pronto")
+        void quandoPedidoAindaNaoEstaPronto() throws Exception {
+            //Arrange
+            cliente = clienteRepository.save(Cliente.builder()
+                    .nome("Anton Ego")
+                    .endereco("Paris")
+                    .codigoAcesso("123456")
+                    .build());
+            pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
+            Associacao associacao = associacaoRepository.save(
+                    Associacao.builder()
+                            .entregador(entregador)
+                            .estabelecimento(estabelecimento1)
+                            .status(true)
+                            .build()
+            );
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("associacaoId", associacao.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest()) // Codigo 409
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            // Assert
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("O pedido ainda não está pronto", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando estabelecimento é diferente da associação")
+        void quandoEstabelecimentoDiferenteDaAssociacao() throws Exception {
+            //Arrange
+            cliente = clienteRepository.save(Cliente.builder()
+                    .nome("Anton Ego")
+                    .endereco("Paris")
+                    .codigoAcesso("123456")
+                    .build());
+            pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
+            Associacao associacao = associacaoRepository.save(
+                    Associacao.builder()
+                            .entregador(entregador)
+                            .estabelecimento(estabelecimento)
+                            .status(true)
+                            .build()
+            );
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", estabelecimento1.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("associacaoId", associacao.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest()) // Codigo 409
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            // Assert
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("Estabelecimento diferente da associacao", resultado.getMessage());
+        }
+
+        @Test
+        @DisplayName("Quando código de acesso do estabelecimento é inválido")
+        void quandoCodigoDeAcessoDoEstabelecimentoInvalido() throws Exception {
+            //Arrange
+            cliente = clienteRepository.save(Cliente.builder()
+                    .nome("Anton Ego")
+                    .endereco("Paris")
+                    .codigoAcesso("123456")
+                    .build());
+            pedido1.setStatusEntrega(PedidoStatusEntregaEnum.PEDIDO_EM_PREPARO);
+            Associacao associacao = associacaoRepository.save(
+                    Associacao.builder()
+                            .entregador(entregador)
+                            .estabelecimento(estabelecimento)
+                            .status(true)
+                            .build()
+            );
+            // Act
+            String responseJsonString = driver.perform(put(URI_PEDIDOS + "/estabelecimentos/" + estabelecimento1.getId() + "/" + pedido1.getId() + "/associar-pedido-entregador")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("estabelecimentoCodigoAcesso", "121212", estabelecimento1.getCodigoAcesso())
+                            .param("pedidoId", pedido1.getId().toString())
+                            .param("associacaoId", associacao.getId().toString())
+                            .content(objectMapper.writeValueAsString(pedidoPostPutRequestDTO)))
+                    .andExpect(status().isBadRequest()) // Codigo 409
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            // Assert
+            CustomErrorType resultado = objectMapper.readValue(responseJsonString, CustomErrorType.class);
+
+            // Assert
+            assertEquals("Codigo de acesso invalido!", resultado.getMessage());
         }
     }
 }

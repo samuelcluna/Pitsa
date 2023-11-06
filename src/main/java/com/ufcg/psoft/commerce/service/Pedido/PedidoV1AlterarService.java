@@ -4,6 +4,7 @@ import com.ufcg.psoft.commerce.dto.Pedido.PedidoPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Pedido.PedidoResponseDTO;
 import com.ufcg.psoft.commerce.events.EventoPedidoEmRota;
 import com.ufcg.psoft.commerce.events.EventoPedidoEntregue;
+import com.ufcg.psoft.commerce.events.EventoPedidoNaoPodeEntregar;
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
 import com.ufcg.psoft.commerce.exception.InvalidResourceException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
@@ -116,7 +117,8 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
                 .orElseThrow(() -> new ResourceNotFoundException("O estabelecimento consultado nao existe!"));
         Pedido pedidoExistente = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new ResourceNotFoundException("O pedido consultado nao existe!"));
-
+        Cliente clienteExistente = clienteRepository.findById(pedidoExistente.getClienteId())
+                .orElseThrow(() -> new ResourceNotFoundException("O cliente consultado nao existe!"));
         if(!estabelecimentoExistente.getCodigoAcesso().equals(codidoAcessoEstabelecimento))
             throw new InvalidResourceException("Codigo de acesso invalido!");
 
@@ -137,9 +139,10 @@ public class PedidoV1AlterarService implements PedidoAlterarService {
             pedidoDefinirEntregadorService.definirEntregador(estabelecimentoId, codidoAcessoEstabelecimento, pedidoId, associacao.getId());
         }
         else{
-            System.out.println("Nenhum entregador disponivel");
+            EventoPedidoNaoPodeEntregar evento = EventoPedidoNaoPodeEntregar.builder()
+                    .cliente(clienteExistente)
+                    .pedido(pedidoExistente).build();
         }
-
         return modelMapper.map(pedidoExistente, PedidoResponseDTO.class);
     }
 

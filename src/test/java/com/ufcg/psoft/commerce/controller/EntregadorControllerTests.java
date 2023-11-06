@@ -779,8 +779,8 @@ public class EntregadorControllerTests {
         }
 
         @Test
-        @DisplayName("Quando alteramos disponibilidade com pedido em espera")
-        void quandoAlteramosDisponibilidadeComPedidoEspera() throws Exception {
+        @DisplayName("Quando alteramos disponibilidade com pedido em espera e entregador em descanso")
+        void quandoAlteramosDisponibilidadeComPedidoEsperaEntregadorDescanso() throws Exception {
             Associacao associacao = associacaoRepository.save(Associacao.builder()
                     .entregador(entregador2)
                     .estabelecimento(estabelecimento)
@@ -799,6 +799,29 @@ public class EntregadorControllerTests {
 
             // Assert
             assertEquals(DisponibilidadeEntregador.OCUPADO, resultado.getDisponibilidade());
+        }
+
+        @Test
+        @DisplayName("Quando alteramos disponibilidade com pedido em espera e entregador ativo")
+        void quandoAlteramosDisponibilidadeComPedidoEsperaEntregadorAtivo() throws Exception {
+            Associacao associacao = associacaoRepository.save(Associacao.builder()
+                    .entregador(entregador1)
+                    .estabelecimento(estabelecimento)
+                    .status(true)
+                    .build());
+
+            String responseJsonString = driver.perform(put(URI_ENTREGADORES + "/" + entregador1.getId() + "/disponibilidade")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .param("codigoAcesso", entregador1.getCodigoAcesso())
+                            .content(objectMapper.writeValueAsString(entregadorPostPutRequestDTO)))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn().getResponse().getContentAsString();
+
+            EntregadorResponseDTO resultado = objectMapper.readValue(responseJsonString, EntregadorResponseDTO.EntregadorResponseDTOBuilder.class).build();
+
+            // Assert
+            assertEquals(DisponibilidadeEntregador.DESCANSO, resultado.getDisponibilidade());
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.ufcg.psoft.commerce.repository.Sabor;
+package com.ufcg.psoft.commerce.repository;
 
 import com.ufcg.psoft.commerce.model.Sabor;
 import org.springframework.data.jpa.repository.JpaRepository;

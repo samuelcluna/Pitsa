@@ -1,12 +1,11 @@
 package com.ufcg.psoft.commerce.service.Sabor;
 
 import com.ufcg.psoft.commerce.exception.InvalidAccessException;
-import com.ufcg.psoft.commerce.exception.RelationshipNotFoundException;
 import com.ufcg.psoft.commerce.exception.ResourceNotFoundException;
 import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.model.Sabor;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
-import com.ufcg.psoft.commerce.repository.Sabor.SaborRepository;
+import com.ufcg.psoft.commerce.repository.SaborRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

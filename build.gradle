@@ -28,6 +28,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	implementation 'org.flywaydb:flyway-core'
+	implementation 'de.vinado.boot:mail-extensions-dkim-javamail-spring-boot-starter:2.0.0'
+	implementation 'de.vinado.boot:mail-extensions-dkim-javamail-spring-boot-starter:2.0.0'
+	implementation 'de.vinado.boot:mail-extensions-dkim-javamail-spring-boot-starter:2.0.0'
+	implementation 'de.vinado.boot:mail-extensions-concurrent-javamail-spring-boot-starter:2.0.0'
+	implementation 'de.vinado.boot:mail-extensions-concurrent-javamail-spring-boot-starter:2.0.0'
+	implementation 'de.vinado.boot:mail-extensions-concurrent-javamail-spring-boot-starter:2.0.0'
+	implementation 'de.vinado.boot:spring-boot-dkim-javamail:1.2.2'
+	implementation 'de.vinado.boot:spring-boot-dkim-javamail:1.2.2'
+	implementation 'de.vinado.boot:spring-boot-dkim-javamail:1.2.2'
+	implementation 'de.vinado.boot:spring-boot-dkim-javamail:1.2.2'
 	compileOnly 'org.projectlombok:lombok'
 	implementation 'org.modelmapper:modelmapper:3.1.1'
 
@@ -39,6 +49,8 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.1.0'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 }
 
 tasks.named('test') {

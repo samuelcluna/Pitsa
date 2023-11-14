@@ -2,11 +2,15 @@ package com.ufcg.psoft.commerce.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -40,4 +44,14 @@ public class Entregador {
     @JsonIgnore
     @Column(nullable = false)
     private String codigoAcesso;
+
+    @JsonProperty("disponibilidade")
+    private DisponibilidadeEntregador disponibilidade;
+
+    @PrePersist
+    private void setDefaultDisponibilidade() {
+        if (disponibilidade == null) {
+            setDisponibilidade(DisponibilidadeEntregador.INATIVO);
+        }
+    }
 }

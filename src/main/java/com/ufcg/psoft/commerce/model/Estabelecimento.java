@@ -1,11 +1,14 @@
 package com.ufcg.psoft.commerce.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
 import jakarta.persistence.*;
 import lombok.*;
 import jakarta.validation.constraints.Size;
 
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -29,4 +32,17 @@ public class Estabelecimento {
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Sabor> sabores;
 
+    @JsonProperty("email")
+    private String email;
+
+    @JsonIgnore
+    @ManyToMany
+    private List<Entregador> entregadoresDisponiveis;
+
+    @PrePersist
+    private void setDefaultDisponibilidade() {
+        if (entregadoresDisponiveis == null) {
+            entregadoresDisponiveis = new LinkedList<>();
+        }
+    }
 }

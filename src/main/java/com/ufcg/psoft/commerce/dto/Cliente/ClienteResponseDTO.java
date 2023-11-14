@@ -19,4 +19,7 @@ public class ClienteResponseDTO {
 
     @JsonProperty("endereco")
     private String endereco;
+
+    @JsonProperty("email")
+    private String email;
 }

@@ -2,6 +2,7 @@ package com.ufcg.psoft.commerce.service.Entregador;
 
 import com.ufcg.psoft.commerce.dto.Entregador.EntregadorPostPutRequestDTO;
 import com.ufcg.psoft.commerce.model.Entregador;
+import com.ufcg.psoft.commerce.model.enums.DisponibilidadeEntregador;
 import com.ufcg.psoft.commerce.repository.EntregadorRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -21,6 +22,7 @@ public class EntregadorV1CriarService implements EntregadorCriarService {
     @Transactional
     public Entregador save(EntregadorPostPutRequestDTO entregadorPostPutRequestDTO) {
         Entregador entregador = modelMapper.map(entregadorPostPutRequestDTO, Entregador.class);
+        entregador.setDisponibilidade(DisponibilidadeEntregador.DESCANSO);
         return entregadorRepository.save(entregador);
     }
 }

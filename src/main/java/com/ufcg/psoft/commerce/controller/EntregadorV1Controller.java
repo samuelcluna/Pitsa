@@ -68,4 +68,14 @@ public class EntregadorV1Controller {
                 .status(HttpStatus.NO_CONTENT)
                 .body("");
     }
+
+    @PutMapping("/{id}/disponibilidade")
+    public ResponseEntity<?> trocarDisponibilidade(
+            @PathVariable Long id,
+            @RequestParam String codigoAcesso
+    ){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(entregadorAlterarService.trocarDisponibilidade(id,codigoAcesso));
+    }
 }

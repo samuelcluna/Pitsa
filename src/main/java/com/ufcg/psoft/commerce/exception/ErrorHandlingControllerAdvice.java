@@ -104,4 +104,13 @@ public class ErrorHandlingControllerAdvice {
         );
     }
 
+    @ExceptionHandler(InvalidResourceException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public CustomErrorType invalidResourceException(InvalidResourceException ex) {
+        return defaultCustomErrorTypeConstruct(
+                ex.getMessage()
+        );
+    }
+
 }

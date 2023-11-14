@@ -7,10 +7,12 @@ import com.ufcg.psoft.commerce.dto.Sabor.SaborPatchRequestDTO;
 import com.ufcg.psoft.commerce.dto.Sabor.SaborPostPutRequestDTO;
 import com.ufcg.psoft.commerce.dto.Sabor.SaborResponseDTO;
 import com.ufcg.psoft.commerce.exception.CustomErrorType;
+import com.ufcg.psoft.commerce.model.Cliente;
 import com.ufcg.psoft.commerce.model.Estabelecimento;
 import com.ufcg.psoft.commerce.model.Sabor;
+import com.ufcg.psoft.commerce.repository.ClienteRepository;
 import com.ufcg.psoft.commerce.repository.EstabelecimentoRepository;
-import com.ufcg.psoft.commerce.repository.Sabor.SaborRepository;
+import com.ufcg.psoft.commerce.repository.SaborRepository;
 import org.junit.jupiter.api.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -41,6 +41,9 @@ public class SaborControllerTests {
     SaborRepository saborRepository;
     @Autowired
     EstabelecimentoRepository estabelecimentoRepository;
+    @Autowired
+    ClienteRepository clienteRepository;
+
 
     ModelMapper modelMapper = new ModelMapper();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -49,6 +52,8 @@ public class SaborControllerTests {
     SaborPostPutRequestDTO saborPostPutRequestDTO;
 
     SaborPatchRequestDTO saborPatchRequestDTO;
+
+    String emailTeste = "emailcontrollertest@gmail.com"; // COLOCAR EMAIL VÁLIDO
 
     @BeforeEach
     void setup() {
@@ -821,4 +826,53 @@ public class SaborControllerTests {
             assertEquals("Codigo de acesso invalido!", resultado.getMessage());
         }
     }
+    @Nested
+    @DisplayName("Conjunto de casos de verificação de preco")
+    class SaborVerificaNotificarClientesInteressados {
+
+        Cliente cliente;
+        Sabor saborNotify;
+        @BeforeEach
+        void setUp(){
+            cliente = new Cliente().builder()
+                    .codigoAcesso("123456")
+                    .nome("Pessoa Teste")
+                    .email(emailTeste)
+                    .endereco("Rua Dr Joao Moura, 157")
+                    .build();
+
+            clienteRepository.save(cliente);
+            saborNotify = new Sabor().builder()
+                    .tipo("doce")
+                    .precoM(40.0)
+                    .precoG(50.0)
+                    .estabelecimento(estabelecimento)
+                    .nome("Frango com Catupiry")
+                    .disponivel(false)
+                    .clientesInteressados(new HashSet<>())
+                    .build();
+            saborNotify.getClientesInteressados().add(cliente.getId());
+            saborRepository.save(saborNotify);
+        }
+
+        @Test
+        @DisplayName("Quando um sabor volta a estar disponivel e notifica cliente")
+        void quandoNotificaCliente() throws Exception{
+            saborPatchRequestDTO.setDisponivel(true);
+            // Act
+                String responseJsonString = driver.perform(patch(URI_SABORES + "/disponibilidade")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .param("saborId", saborNotify.getId().toString())
+                                .param("estabelecimentoId", estabelecimento.getId().toString())
+                                .param("estabelecimentoCodigoAcesso", estabelecimento.getCodigoAcesso())
+                                .content(objectMapper.writeValueAsString(saborPatchRequestDTO)))
+                        .andExpect(status().isOk()) // Codigo 200
+                        .andDo(print())
+                        .andReturn().getResponse().getContentAsString();
+            SaborResponseDTO resultado = objectMapper.readValue(responseJsonString, SaborResponseDTO.SaborResponseDTOBuilder.class).build();
+            assertEquals(0, resultado.getClientesInteressados().size());
+        }
+
+    }
+
 }

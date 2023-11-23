@@ -32,7 +32,7 @@ decidiu desenvolver seu próprio aplicativo de delivery. E adivinha só… você
 
 ## 2ª Etapa: USs 08-11
 
-- *Descrição das participações, critérios utilizados e modelagem do sistema: [Link para o documento da etapa 1](https://docs.google.com/document/d/1i-knQ6T3lSrhleyF5Rj7yopdhAIhdrUBjccU0psZPcQ/edit)*
+- *Descrição das participações, critérios utilizados e modelagem do sistema: [Link para o documento da etapa 2](https://docs.google.com/document/d/13cH8Y2y1qWH1n8nBTFaiRZ3sb-4Z0-CB9gEypPwxjuY/edit)*
 
 - [x] **US8:** Eu, enquanto cliente, quero utilizar o sistema para fazer pedidos de pizza a um estabelecimento. Mais
   detalhadamente, deve ser possível criar, ler, editar e remover pedidos;
@@ -46,7 +46,7 @@ decidiu desenvolver seu próprio aplicativo de delivery. E adivinha só… você
 
 ## 3ª Etapa: USs 12-17
 
-- *Descrição das participações, critérios utilizados e modelagem do sistema: [Link para o documento da etapa 1](https://docs.google.com/document/d/1i-knQ6T3lSrhleyF5Rj7yopdhAIhdrUBjccU0psZPcQ/edit)*
+- *Descrição das participações, critérios utilizados e modelagem do sistema: [Link para o documento da etapa 3](https://docs.google.com/document/d/14Q5w7ADPLUoTTNw85_PZpcm1do7twTfleItVloyz2nM/edit)*
 
 - [x] **US12:** Eu, enquanto estabelecimento, quero que o sistema garanta a corretude nas mudanças de status dos
   pedidos;
@@ -64,7 +64,7 @@ decidiu desenvolver seu próprio aplicativo de delivery. E adivinha só… você
 
 ## 4ª Etapa: USs 18-20
 
-- *Descrição das participações, critérios utilizados e modelagem do sistema: [Link para o documento da etapa 1](https://docs.google.com/document/d/1i-knQ6T3lSrhleyF5Rj7yopdhAIhdrUBjccU0psZPcQ/edit)*
+- *Descrição das participações, critérios utilizados e modelagem do sistema: [Link para o documento da etapa 4](https://docs.google.com/document/d/1FQFJS8_wZ1xx-A63N7a3HfQvV41M5aexPJeGmHFBP1w/edit)*
 
 - [x] **US18:** Eu, enquanto funcionário(a) terceirizado(a), desejo definir se estou disponível (ou não) para realizar
   as entregas do estabelecimento;
@@ -82,7 +82,7 @@ decidiu desenvolver seu próprio aplicativo de delivery. E adivinha só… você
 
 <div align="center">
   
-<img src="https://github.com/samuelcluna/Pitsa/blob/master/images/modelagem.png" width="750px;"/>
+<img src="https://github.com/samuelcluna/Pitsa/blob/master/images/modelagem.png" width="700px;"/>
 
 </div>
 
